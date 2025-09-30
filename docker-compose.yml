@@ -1,0 +1,15 @@
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "8080:80"
+      - "4430:443"
+    volumes:
+      - ${ROOT_PATH}:/var/www/app
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+# path to sertificate
+      - ${SERVER_CRT_PATH}:/ssl/server.crt
+# path to key
+      - ${SERVER_KEY_PATH}:/ssl/server.key

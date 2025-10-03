@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ru">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Passwordless — Вход</title>
+    <style>
+        :root {
+            --bg: #f6f9fc;
+            --card: #fff;
+            --accent: #2563eb;
+            --muted: #6b7280
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, Segoe UI, Roboto, -apple-system, Arial, sans-serif;
+            background: linear-gradient(180deg, #eef2ff, #f8fafc);
+            color: #111
+        }
+
+        header {
+            text-align: center;
+            padding: 4px 20px;
+        }
+
+        .logo-container {
+            height: 40px;
+            /* фиксированная высота под логотип */
+            display: flex;
+            align-items: center;
+            /* выравнивание по центру по вертикали */
+            justify-content: center;
+            /* по центру по горизонтали */
+            padding: 0 20px;
+        }
+
+        .logo-container img {
+            max-height: 100%;
+            /* логотип впишется в высоту блока */
+            max-width: 100%;
+            /* не выйдет за границы по ширине */
+            object-fit: contain;
+        }
+
+        .wrap {
+            max-width: 760px;
+            margin: 6vh auto;
+            padding: 24px
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 6px 20px rgba(16, 24, 40, 0.08)
+        }
+
+        h1 {
+            margin: 0 0 6px;
+            font-size: 20px
+        }
+
+        p.lead {
+            margin: 0 0 18px;
+            color: var(--muted)
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px
+        }
+
+        .tab {
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--muted);
+            cursor: pointer
+        }
+
+        .tab.active {
+            background: rgba(37, 99, 235, 0.08);
+            border-color: rgba(37, 99, 235, 0.16);
+            color: var(--accent);
+            font-weight: 600
+        }
+
+        form .field {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 12px
+        }
+
+        label {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 6px
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"] {
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #e6eef6;
+            font-size: 15px
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 12px
+        }
+
+        button.primary {
+            background: var(--accent);
+            color: #fff;
+            border: 0;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer
+        }
+
+        button.ghost {
+            background: transparent;
+            border: 1px solid #e6eef6;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 13px;
+            margin-left: 8px
+        }
+
+        .status {
+            margin-top: 12px;
+            color: var(--muted);
+            font-size: 14px
+        }
+
+        .otp-box {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px
+        }
+
+        .otp-box input {
+            width: 3rem;
+            text-align: center;
+            font-size: 18px;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #e6eef6
+        }
+
+        footer {
+            margin-top: 18px;
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        @media (max-width:640px) {
+            .wrap {
+                padding: 12px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="logo.png" alt="Логотип проекта">
+        </div>
+    </header>
+    <div class="wrap">
+        <section class="hero">
+            <h1>Добро пожаловать в MyAuction</h1>
+            <p>Вход без пароля. Безопасно и удобно.</p>
+        </section>
+        <div class="card" role="main">
+            <h1>Вход без пароля</h1>
+            <p class="lead">Выбери способ: по Email или по SMS. Мы пришлём код или ссылку для входа.</p>
+
+            <div class="tabs" role="tablist">
+                <button class="tab active" id="tab-email" data-mode="email" role="tab"
+                    aria-selected="true">Email</button>
+                <button class="tab" id="tab-phone" data-mode="phone" role="tab">Телефон</button>
+            </div>
+
+            <form id="authForm" autocomplete="off">
+                <div class="field" id="field-email">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" placeholder="you@example.com" required />
+                </div>
+
+                <div class="field" id="field-phone" style="display:none">
+                    <label for="phone">Телефон</label>
+                    <input id="phone" name="phone" type="tel" placeholder="+7 700 000 0000" />
+                </div>
+
+                <div class="actions">
+                    <button class="primary" id="sendBtn" type="submit">Отправить код</button>
+                    <button type="button" id="useLink" class="ghost" title="Отправить одноразовую ссылку">Отправить
+                        ссылку</button>
+                    <div class="hint">Нет пароля — быстро и безопасно.</div>
+                </div>
+
+                <div class="status" id="status">&nbsp;</div>
+
+                <div id="otpArea" style="display:none">
+                    <div class="field">
+                        <label>Введите код (или вставьте ссылку из почты/смс)</label>
+                        <div class="otp-box" id="otpInputs">
+                            <input inputmode="numeric" maxlength="1" />
+                            <input inputmode="numeric" maxlength="1" />
+                            <input inputmode="numeric" maxlength="1" />
+                            <input inputmode="numeric" maxlength="1" />
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button class="primary" id="verifyBtn" type="button">Подтвердить код</button>
+                        <button class="ghost" id="resendBtn" type="button">Отправить заново</button>
+                    </div>
+                </div>
+
+            </form>
+
+            <footer>Для защиты от злоупотреблений реализованы rate-limit и captcha (на бэкенде). Демо-страница —
+                клиентская часть только.</footer>
+        </div>
+    </div>
+
+    <script>
+        // Простая клиентская логика для passwordless (fetch к Laravel API)
+        const tabEmail = document.getElementById('tab-email');
+        const tabPhone = document.getElementById('tab-phone');
+        const fieldEmail = document.getElementById('field-email');
+        const fieldPhone = document.getElementById('field-phone');
+        const authForm = document.getElementById('authForm');
+        const sendBtn = document.getElementById('sendBtn');
+        const statusEl = document.getElementById('status');
+        const useLink = document.getElementById('useLink');
+        const otpArea = document.getElementById('otpArea');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const resendBtn = document.getElementById('resendBtn');
+        const otpInputs = document.getElementById('otpInputs');
+
+        let mode = 'email';
+        let lastIdentifier = null;
+
+        function setMode(m) { mode = m; tabEmail.classList.toggle('active', m === 'email'); tabPhone.classList.toggle('active', m === 'phone'); fieldEmail.style.display = m === 'email' ? 'block' : 'none'; fieldPhone.style.display = m === 'phone' ? 'block' : 'none'; statusEl.textContent = ''; otpArea.style.display = 'none'; }
+
+        tabEmail.addEventListener('click', () => setMode('email'));
+        tabPhone.addEventListener('click', () => setMode('phone'));
+
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            sendBtn.disabled = true;
+            statusEl.textContent = 'Отправляем код...';
+            const payload = {};
+            if (mode === 'email') payload.email = document.getElementById('email').value.trim();
+            else payload.phone = document.getElementById('phone').value.trim();
+            lastIdentifier = payload.email || payload.phone;
+
+            try {
+                const resp = await fetch('/api/auth/passwordless/send', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                });
+                const data = await resp.json();
+                if (resp.ok) {
+                    statusEl.textContent = data.message || 'Код отправлен.';
+                    otpArea.style.display = 'block';
+                    focusOtp();
+                } else {
+                    statusEl.textContent = data.error || 'Ошибка: ' + resp.status;
+                }
+            } catch (err) { statusEl.textContent = 'Ошибка сети: ' + err.message; }
+            sendBtn.disabled = false;
+        });
+
+        useLink.addEventListener('click', async () => {
+            // запрашиваем отправку ссылки
+            sendBtn.disabled = true; statusEl.textContent = 'Отправляем ссылку...';
+            const payload = {};
+            if (mode === 'email') payload.email = document.getElementById('email').value.trim(); else payload.phone = document.getElementById('phone').value.trim();
+            try {
+                const resp = await fetch('/api/auth/passwordless/send?link=1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const data = await resp.json();
+                statusEl.textContent = data.message || 'Ссылка отправлена.';
+            } catch (err) { statusEl.textContent = 'Ошибка сети'; }
+            sendBtn.disabled = false;
+        });
+
+        verifyBtn.addEventListener('click', async () => {
+            const code = Array.from(otpInputs.querySelectorAll('input')).map(i => i.value).join('');
+            if (!code || code.length < 4) { statusEl.textContent = 'Введите код полностью'; return; }
+            verifyBtn.disabled = true; statusEl.textContent = 'Проверяем...';
+            try {
+                const resp = await fetch('/api/auth/passwordless/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ identifier: lastIdentifier, code }) });
+                const data = await resp.json();
+                if (resp.ok) {
+                    statusEl.textContent = 'Успешно! Переходим...';
+                    // пример: сервер вернёт JWT или установит сессионный cookie и redirect
+                    if (data.redirect) window.location.href = data.redirect; else console.log('token', data.token);
+                } else { statusEl.textContent = data.error || 'Неверный код'; }
+            } catch (err) { statusEl.textContent = 'Ошибка сети'; }
+            verifyBtn.disabled = false;
+        });
+
+        resendBtn.addEventListener('click', () => { if (lastIdentifier) { /* можно вызвать отправку снова, с бэкенда rate-limit */ statusEl.textContent = 'Отправлено заново'; } });
+
+        // focus helpers
+        function focusOtp() { const first = otpInputs.querySelector('input'); if (first) first.focus(); }
+        otpInputs.addEventListener('input', (e) => { const t = e.target; if (t.value.length === 1) { const next = t.nextElementSibling; if (next) next.focus(); } });
+
+        // basic client validation (email/phone)
+        function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+        function isValidPhone(p) { return /^\+?[0-9\s\-()]{7,15}$/.test(p); }
+
+        // simple UX: prevent sending invalid
+        document.getElementById('email').addEventListener('input', () => { const v = document.getElementById('email').value; sendBtn.disabled = !(isValidEmail(v)); useLink.disabled = !(isValidEmail(v)); });
+        document.getElementById('phone').addEventListener('input', () => { const v = document.getElementById('phone').value; sendBtn.disabled = !(isValidPhone(v)); useLink.disabled = !(isValidPhone(v)); });
+
+        // initial disable until input
+        sendBtn.disabled = true; useLink.disabled = true;
+
+    </script>
+</body>
+
+</html>

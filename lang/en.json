@@ -1,0 +1,16 @@
+{
+    "title": "Passwordless Sign In",
+    "auth_title": "Passwordless Sign In",
+    "welcome_title": "Welcome to Real16",
+    "welcome_text": "Take the personality test with Real16",
+    "auth_text": "To start the typing, log in to the application.",
+    "auth_lead": "Choose a method: by Email or by SMS. We will send a login code.",
+    "tab_phone": "Phone",
+    "phone_label": "Phone",
+    "send_btn": "Send Code",
+    "passwordless_hint": "No password — fast and secure.",
+    "otp_label": "Enter the code from email/SMS",
+    "verify_btn": "Verify Code",
+    "resend_btn": "Resend Code",
+    "footer": "To protect against abuse, rate-limit and captcha are implemented (on the backend). Demo page — client side only."
+}

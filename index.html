@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Passwordless — Вход</title>
+    <title id="title">Passwordless Sign In</title>
     <style>
         :root {
             --bg: #f6f9fc;
@@ -31,26 +31,21 @@
 
         .logo-container {
             height: 40px;
-            /* фиксированная высота под логотип */
             display: flex;
             align-items: center;
-            /* выравнивание по центру по вертикали */
             justify-content: center;
-            /* по центру по горизонтали */
             padding: 0 20px;
         }
 
         .logo-container img {
             max-height: 100%;
-            /* логотип впишется в высоту блока */
             max-width: 100%;
-            /* не выйдет за границы по ширине */
             object-fit: contain;
         }
 
         .wrap {
             max-width: 760px;
-            margin: 6vh auto;
+            margin: 3vh auto;
             padding: 24px
         }
 
@@ -94,7 +89,7 @@
         }
 
         form .field {
-            display: flex;
+            display: block;
             flex-direction: column;
             margin-bottom: 12px
         }
@@ -182,22 +177,27 @@
 <body>
     <header>
         <div class="logo-container">
-            <img src="logo.png" alt="Логотип проекта">
+            <img id="logo" src="logo.png" alt="logo" />
+        </div>
+        <div id="lang-switch">
+            <button id="lang-en" data-lang="en" class="tab active">EN</button>
+            <button id="lang-ru" data-lang="ru" class="tab">RU</button>
         </div>
     </header>
     <div class="wrap">
         <section class="hero">
-            <h1>Добро пожаловать в Real16</h1>
-            <p>Для начала типирования войдите в приложение.</p>
+            <h1 id="welcome-title">Welcome to Real16</h1>
+            <p id="welcome-text">Take the personality test with Real16</p>
+            <p id="auth-text">To start the typing, log in to the application.</p>
         </section>
         <div class="card" role="main">
-            <h1>Вход без пароля</h1>
-            <p class="lead">Выбери способ: по Email или по SMS. Мы пришлём код входа.</p>
+            <h1 id="auth-title">Passwordless Sign In</h1>
+            <p id="auth-lead" class="lead">Choose a method: by Email or by SMS. We will send a login code.</p>
 
             <div class="tabs" role="tablist">
                 <button class="tab active" id="tab-email" data-mode="email" role="tab"
                     aria-selected="true">Email</button>
-                <button class="tab" id="tab-phone" data-mode="phone" role="tab">Телефон</button>
+                <button class="tab" id="tab-phone" data-mode="phone" role="tab">Phone</button>
             </div>
 
             <form id="authForm" autocomplete="off">
@@ -207,20 +207,20 @@
                 </div>
 
                 <div class="field" id="field-phone" style="display:none">
-                    <label for="phone">Телефон</label>
+                    <label id="phone-label" for="phone">Phone</label>
                     <input id="phone" name="phone" type="tel" placeholder="+0 000 000 0000" />
                 </div>
 
                 <div class="actions">
-                    <button class="primary" id="sendBtn" type="submit">Отправить код</button>
-                    <div class="hint">Нет пароля — быстро и безопасно.</div>
+                    <button class="primary" id="sendBtn" type="submit">Send code</button>
+                    <div id="passwordless-hint"class="hint">No password — fast and secure.</div>
                 </div>
 
                 <div class="status" id="status">&nbsp;</div>
 
                 <div id="otpArea" style="display:none">
                     <div class="field">
-                        <label>Введите код (или вставьте ссылку из почты/смс)</label>
+                        <label id="otp-label">Enter the code from email/SMS</label>
                         <div class="otp-box" id="otpInputs">
                             <input inputmode="numeric" maxlength="1" />
                             <input inputmode="numeric" maxlength="1" />
@@ -229,20 +229,18 @@
                         </div>
                     </div>
                     <div class="actions">
-                        <button class="primary" id="verifyBtn" type="button">Подтвердить код</button>
-                        <button class="ghost" id="resendBtn" type="button">Отправить заново</button>
+                        <button class="primary" id="verifyBtn" type="button">Verify Code</button>
+                        <button class="ghost" id="resendBtn" type="button">Resend Code</button>
                     </div>
                 </div>
 
             </form>
 
-            <footer>Для защиты от злоупотреблений реализованы rate-limit и captcha (на бэкенде). Демо-страница —
-                клиентская часть только.</footer>
+            <footer id="footer">To protect against abuse, rate-limit and captcha are implemented (on the backend). Demo page — client side only.</footer>
         </div>
     </div>
 
     <script>
-        // Простая клиентская логика для passwordless (fetch к Laravel API)
         const tabEmail = document.getElementById('tab-email');
         const tabPhone = document.getElementById('tab-phone');
         const fieldEmail = document.getElementById('field-email');
@@ -250,19 +248,36 @@
         const authForm = document.getElementById('authForm');
         const sendBtn = document.getElementById('sendBtn');
         const statusEl = document.getElementById('status');
-        const useLink = document.getElementById('useLink');
         const otpArea = document.getElementById('otpArea');
         const verifyBtn = document.getElementById('verifyBtn');
         const resendBtn = document.getElementById('resendBtn');
         const otpInputs = document.getElementById('otpInputs');
+        const currentLang = localStorage.getItem('lang') || 'en';
+        const langSwitches = document.querySelectorAll('#lang-switch button');
 
         let mode = 'email';
         let lastIdentifier = null;
 
-        function setMode(m) { mode = m; tabEmail.classList.toggle('active', m === 'email'); tabPhone.classList.toggle('active', m === 'phone'); fieldEmail.style.display = m === 'email' ? 'block' : 'none'; fieldPhone.style.display = m === 'phone' ? 'block' : 'none'; statusEl.textContent = ''; otpArea.style.display = 'none'; }
+        function setMode(m) {
+            mode = m;
+            tabEmail.classList.toggle('active', m === 'email');
+            tabPhone.classList.toggle('active', m === 'phone');
+            fieldEmail.style.display = m === 'email' ? 'block' : 'none';
+            fieldPhone.style.display = m === 'phone' ? 'block' : 'none';
+            statusEl.textContent = ''; otpArea.style.display = 'none';
+        }
 
         tabEmail.addEventListener('click', () => setMode('email'));
         tabPhone.addEventListener('click', () => setMode('phone'));
+        langSwitches.forEach(btn => {
+            btn.addEventListener('click', () => {
+                langSwitches.forEach(b => b.classList.toggle('active', false));
+                btn.classList.toggle('active', true);
+                const currentLang = btn.dataset.lang;
+                localStorage.setItem('lang', currentLang);
+                loadLang(currentLang);
+            });
+        });
 
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -289,25 +304,19 @@
             sendBtn.disabled = false;
         });
 
-        useLink.addEventListener('click', async () => {
-            // запрашиваем отправку ссылки
-            sendBtn.disabled = true; statusEl.textContent = 'Отправляем ссылку...';
-            const payload = {};
-            if (mode === 'email') payload.email = document.getElementById('email').value.trim(); else payload.phone = document.getElementById('phone').value.trim();
-            try {
-                const resp = await fetch('/api/auth/passwordless/send?link=1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                const data = await resp.json();
-                statusEl.textContent = data.message || 'Ссылка отправлена.';
-            } catch (err) { statusEl.textContent = 'Ошибка сети'; }
-            sendBtn.disabled = false;
-        });
-
         verifyBtn.addEventListener('click', async () => {
             const code = Array.from(otpInputs.querySelectorAll('input')).map(i => i.value).join('');
             if (!code || code.length < 4) { statusEl.textContent = 'Введите код полностью'; return; }
             verifyBtn.disabled = true; statusEl.textContent = 'Проверяем...';
             try {
-                const resp = await fetch('/api/auth/passwordless/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ identifier: lastIdentifier, code }) });
+                const resp = await fetch(
+                    '/api/auth/passwordless/verify',
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ identifier: lastIdentifier, code })
+                    }
+                );
                 const data = await resp.json();
                 if (resp.ok) {
                     statusEl.textContent = 'Успешно! Переходим...';
@@ -318,23 +327,64 @@
             verifyBtn.disabled = false;
         });
 
-        resendBtn.addEventListener('click', () => { if (lastIdentifier) { /* можно вызвать отправку снова, с бэкенда rate-limit */ statusEl.textContent = 'Отправлено заново'; } });
+        resendBtn.addEventListener('click', () => {
+            if (lastIdentifier) {
+             /* можно вызвать отправку снова, с бэкенда rate-limit */
+                statusEl.textContent = 'Отправлено заново';
+            }
+        });
 
         // focus helpers
         function focusOtp() { const first = otpInputs.querySelector('input'); if (first) first.focus(); }
-        otpInputs.addEventListener('input', (e) => { const t = e.target; if (t.value.length === 1) { const next = t.nextElementSibling; if (next) next.focus(); } });
+        otpInputs.addEventListener('input', (e) => {
+            const t = e.target;
+            if (t.value.length === 1) {
+                const next = t.nextElementSibling;
+                if (next) next.focus();
+            }
+        });
 
         // basic client validation (email/phone)
         function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
         function isValidPhone(p) { return /^\+?[0-9\s\-()]{7,15}$/.test(p); }
 
         // simple UX: prevent sending invalid
-        document.getElementById('email').addEventListener('input', () => { const v = document.getElementById('email').value; sendBtn.disabled = !(isValidEmail(v)); useLink.disabled = !(isValidEmail(v)); });
-        document.getElementById('phone').addEventListener('input', () => { const v = document.getElementById('phone').value; sendBtn.disabled = !(isValidPhone(v)); useLink.disabled = !(isValidPhone(v)); });
+        document.getElementById('email').addEventListener('input', () => {
+            const v = document.getElementById('email').value;
+            sendBtn.disabled = !(isValidEmail(v));
+            useLink.disabled = !(isValidEmail(v));
+        });
+        document.getElementById('phone').addEventListener('input', () => {
+            const v = document.getElementById('phone').value;
+            sendBtn.disabled = !(isValidPhone(v));
+            useLink.disabled = !(isValidPhone(v));
+        });
 
         // initial disable until input
-        sendBtn.disabled = true; useLink.disabled = true;
-
+        sendBtn.disabled = true;
+        loadLang(currentLang);
+        function loadLang(lang) {
+            fetch(`/lang/${lang}.json`)
+            .then(r => r.json())
+            .then(t => {
+                document.getElementById('title').textContent = t.title;
+                document.getElementById('auth-title').textContent = t.auth_title;
+                document.getElementById('welcome-title').textContent = t.welcome_title;
+                document.getElementById('welcome-text').textContent = t.welcome_text;
+                document.getElementById('auth-text').textContent = t.auth_text;
+                document.getElementById('auth-lead').textContent = t.auth_lead;
+                tabPhone.textContent = t.tab_phone;
+                document.getElementById('phone-label').textContent = t.phone_label;
+                sendBtn.textContent = t.send_btn;
+                document.getElementById('passwordless-hint').textContent = t.passwordless_hint;
+                document.getElementById('otp-label').textContent = t.otp_label;
+                verifyBtn.textContent = t.verify_btn;
+                resendBtn.textContent = t.resend_btn;
+                document.getElementById('footer').textContent = t.footer;
+                langSwitches.forEach(b => b.classList.toggle('active', false));
+                document.getElementById('lang-' + lang).classList.toggle('active', true);
+            });
+        }
     </script>
 </body>
 

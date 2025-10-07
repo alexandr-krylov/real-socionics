@@ -12,5 +12,9 @@
     "otp_label": "Enter the code from email/SMS",
     "verify_btn": "Verify Code",
     "resend_btn": "Resend Code",
-    "footer": "To protect against abuse, rate-limit and captcha are implemented (on the backend). Demo page — client side only."
+    "footer": "To protect against abuse, rate-limit and captcha are implemented (on the backend). Demo page — client side only.",
+    "sending_code": "Sending code...",
+    "code_sent": "Code sent! Check your email/SMS.",
+    "error": "Error",
+    "net_error": "Network error"
 }

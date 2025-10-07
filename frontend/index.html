@@ -257,6 +257,7 @@
 
         let mode = 'email';
         let lastIdentifier = null;
+        let translations = {};
 
         function setMode(m) {
             mode = m;
@@ -282,7 +283,7 @@
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             sendBtn.disabled = true;
-            statusEl.textContent = 'Отправляем код...';
+            statusEl.textContent = translations.sending_code;
             const payload = {};
             if (mode === 'email') payload.email = document.getElementById('email').value.trim();
             else payload.phone = document.getElementById('phone').value.trim();
@@ -294,13 +295,14 @@
                 });
                 const data = await resp.json();
                 if (resp.ok) {
-                    statusEl.textContent = data.message || 'Код отправлен.';
+                    console.log('data', data);
+                    statusEl.textContent = translations[data.message] || translations.code_sent;
                     otpArea.style.display = 'block';
                     focusOtp();
                 } else {
-                    statusEl.textContent = data.error || 'Ошибка: ' + resp.status;
+                    statusEl.textContent = data.error || translations.error + ': ' + resp.status;
                 }
-            } catch (err) { statusEl.textContent = 'Ошибка сети: ' + err.message; }
+            } catch (err) { statusEl.textContent = translations.net_error + ': ' + err.message; }
             sendBtn.disabled = false;
         });
 
@@ -367,6 +369,8 @@
             fetch(`/lang/${lang}.json`)
             .then(r => r.json())
             .then(t => {
+                translations = t;
+                statusEl.textContent = '';
                 document.getElementById('title').textContent = t.title;
                 document.getElementById('auth-title').textContent = t.auth_title;
                 document.getElementById('welcome-title').textContent = t.welcome_title;

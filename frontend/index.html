@@ -256,6 +256,8 @@
         const otpInputs = document.getElementById('otpInputs');
         const currentLang = localStorage.getItem('lang') || 'en';
         const langSwitches = document.querySelectorAll('#lang-switch button');
+        const inputEmail = document.getElementById('email');
+        const inputPhone = document.getElementById('phone');
 
         let mode = 'email';
         let lastIdentifier = null;
@@ -265,6 +267,8 @@
             mode = m;
             tabEmail.classList.toggle('active', m === 'email');
             tabPhone.classList.toggle('active', m === 'phone');
+            inputEmail.required = m === 'email';
+            inputPhone.required = m === 'phone';
             fieldEmail.style.display = m === 'email' ? 'block' : 'none';
             fieldPhone.style.display = m === 'phone' ? 'block' : 'none';
             statusEl.textContent = ''; otpArea.style.display = 'none';
@@ -310,7 +314,7 @@
 
         verifyBtn.addEventListener('click', async () => {
             const code = Array.from(otpInputs.querySelectorAll('input')).map(i => i.value).join('');
-            if (!code || code.length < 4) { statusEl.textContent = translations.code_error; return; }
+            if (!code || code.length < 6) { statusEl.textContent = translations.code_error; return; }
             verifyBtn.disabled = true; statusEl.textContent = translations.verifying;
             try {
                 const resp = await fetch(
@@ -356,12 +360,10 @@
         document.getElementById('email').addEventListener('input', () => {
             const v = document.getElementById('email').value;
             sendBtn.disabled = !(isValidEmail(v));
-            useLink.disabled = !(isValidEmail(v));
         });
         document.getElementById('phone').addEventListener('input', () => {
             const v = document.getElementById('phone').value;
             sendBtn.disabled = !(isValidPhone(v));
-            useLink.disabled = !(isValidPhone(v));
         });
 
         // initial disable until input

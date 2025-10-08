@@ -32,5 +32,26 @@ Route::post('/auth/passwordless/send', function (Request $request) {
         // Http::post('https://sms-provider.example.com/send', ['to' => $data['phone'], 'text' => "Ваш код: $code"]);
     }
 
-    return response()->json(['message' => 'Код отправлен']);
+    return response()->json(['message' => 'code_sent']);//, 200);
+});
+
+Route::post('/auth/passwordless/verify', function (Request $request) {
+    $data = $request->validate([
+        'email' => 'nullable|email',
+        'phone' => 'nullable|string',
+        'code' => 'required|string',
+    ]);
+
+    if (empty($data['email']) && empty($data['phone'])) {
+        return response()->json(['error' => 'Email или телефон обязателен'], 422);
+    }
+
+    $identifier = $data['email'] ?? $data['phone'];
+    $code = Cache::get("otp_{$identifier}");
+
+    if ($code !== $data['code']) {
+        return response()->json(['error' => 'Неверный код'], 422);
+    }
+
+    return response()->json(['message' => 'success_and_redirect']);//, 200);
 });

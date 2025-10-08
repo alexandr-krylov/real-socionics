@@ -186,18 +186,18 @@
     </header>
     <div class="wrap">
         <section class="hero">
-            <h1 id="welcome-title">Welcome to Real16</h1>
-            <p id="welcome-text">Take the personality test with Real16</p>
-            <p id="auth-text">To start the typing, log in to the application.</p>
+            <h1 id="welcome-title"></h1>
+            <p id="welcome-text"></p>
+            <p id="auth-text"></p>
         </section>
         <div class="card" role="main">
-            <h1 id="auth-title">Passwordless Sign In</h1>
-            <p id="auth-lead" class="lead">Choose a method: by Email or by SMS. We will send a login code.</p>
+            <h1 id="auth-title"></h1>
+            <p id="auth-lead" class="lead"></p>
 
             <div class="tabs" role="tablist">
                 <button class="tab active" id="tab-email" data-mode="email" role="tab"
                     aria-selected="true">Email</button>
-                <button class="tab" id="tab-phone" data-mode="phone" role="tab">Phone</button>
+                <button class="tab" id="tab-phone" data-mode="phone" role="tab"></button>
             </div>
 
             <form id="authForm" autocomplete="off">
@@ -207,21 +207,23 @@
                 </div>
 
                 <div class="field" id="field-phone" style="display:none">
-                    <label id="phone-label" for="phone">Phone</label>
+                    <label id="phone-label" for="phone"></label>
                     <input id="phone" name="phone" type="tel" placeholder="+0 000 000 0000" />
                 </div>
 
                 <div class="actions">
-                    <button class="primary" id="sendBtn" type="submit">Send code</button>
-                    <div id="passwordless-hint"class="hint">No password — fast and secure.</div>
+                    <button class="primary" id="sendBtn" type="submit"></button>
+                    <div id="passwordless-hint"class="hint"></div>
                 </div>
 
                 <div class="status" id="status">&nbsp;</div>
 
                 <div id="otpArea" style="display:none">
                     <div class="field">
-                        <label id="otp-label">Enter the code from email/SMS</label>
+                        <label id="otp-label"></label>
                         <div class="otp-box" id="otpInputs">
+                            <input inputmode="numeric" maxlength="1" />
+                            <input inputmode="numeric" maxlength="1" />
                             <input inputmode="numeric" maxlength="1" />
                             <input inputmode="numeric" maxlength="1" />
                             <input inputmode="numeric" maxlength="1" />
@@ -229,14 +231,14 @@
                         </div>
                     </div>
                     <div class="actions">
-                        <button class="primary" id="verifyBtn" type="button">Verify Code</button>
-                        <button class="ghost" id="resendBtn" type="button">Resend Code</button>
+                        <button class="primary" id="verifyBtn" type="button"></button>
+                        <button class="ghost" id="resendBtn" type="button"></button>
                     </div>
                 </div>
 
             </form>
 
-            <footer id="footer">To protect against abuse, rate-limit and captcha are implemented (on the backend). Demo page — client side only.</footer>
+            <footer id="footer"></footer>
         </div>
     </div>
 
@@ -300,7 +302,7 @@
                     otpArea.style.display = 'block';
                     focusOtp();
                 } else {
-                    statusEl.textContent = data.error || translations.error + ': ' + resp.status;
+                    statusEl.textContent = translations[data.error] || translations.error + ': ' + resp.status;
                 }
             } catch (err) { statusEl.textContent = translations.net_error + ': ' + err.message; }
             sendBtn.disabled = false;
@@ -308,8 +310,8 @@
 
         verifyBtn.addEventListener('click', async () => {
             const code = Array.from(otpInputs.querySelectorAll('input')).map(i => i.value).join('');
-            if (!code || code.length < 4) { statusEl.textContent = 'Введите код полностью'; return; }
-            verifyBtn.disabled = true; statusEl.textContent = 'Проверяем...';
+            if (!code || code.length < 4) { statusEl.textContent = translations.code_error; return; }
+            verifyBtn.disabled = true; statusEl.textContent = translations.verifying;
             try {
                 const resp = await fetch(
                     '/api/auth/passwordless/verify',
@@ -321,18 +323,18 @@
                 );
                 const data = await resp.json();
                 if (resp.ok) {
-                    statusEl.textContent = 'Успешно! Переходим...';
+                    statusEl.textContent = translations.success_and_redirect;
                     // пример: сервер вернёт JWT или установит сессионный cookie и redirect
                     if (data.redirect) window.location.href = data.redirect; else console.log('token', data.token);
-                } else { statusEl.textContent = data.error || 'Неверный код'; }
-            } catch (err) { statusEl.textContent = 'Ошибка сети'; }
+                } else { statusEl.textContent = translations[data.error] || translations.wrong_code; }
+            } catch (err) { statusEl.textContent = translations.net_error; }
             verifyBtn.disabled = false;
         });
 
         resendBtn.addEventListener('click', () => {
             if (lastIdentifier) {
              /* можно вызвать отправку снова, с бэкенда rate-limit */
-                statusEl.textContent = 'Отправлено заново';
+                statusEl.textContent = translations.resent;
             }
         });
 

@@ -1,49 +1,195 @@
 <!doctype html>
 <html lang="ru">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Answer-to-Camera — заготовка</title>
   <style>
-    :root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#9aa4b2;--glass:rgba(255,255,255,0.03)}
-    html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#071026 0%, #071827 100%);color:#e6eef6}
-    .wrap{max-width:1100px;margin:28px auto;padding:20px}
-    header{display:flex;align-items:center;gap:16px}
-    h1{margin:0;font-size:20px}
-    .app{display:grid;grid-template-columns:640px 1fr;gap:18px;margin-top:18px}
+    :root {
+      --bg: #0f1724;
+      --card: #0b1220;
+      --accent: #06b6d4;
+      --muted: #9aa4b2;
+      --glass: rgba(255, 255, 255, 0.03)
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      font-family: Inter, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(180deg, #071026 0%, #071827 100%);
+      color: #e6eef6
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 28px auto;
+      padding: 20px
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 16px
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 640px 1fr;
+      gap: 18px;
+      margin-top: 18px
+    }
 
     /* left: camera */
-    .camera-card{background:var(--card);border-radius:12px;padding:12px;box-shadow:0 4px 30px rgba(2,6,23,0.6)}
-    video#preview{width:100%;height:360px;background:#000;border-radius:8px;object-fit:cover}
-    .controls{display:flex;align-items:center;gap:8px;margin-top:10px}
-    button{background:var(--accent);border:0;padding:8px 12px;border-radius:8px;color:#022;cursor:pointer;font-weight:600}
-    button.ghost{background:transparent;color:var(--accent);border:1px solid rgba(6,182,212,0.15)}
-    .status{margin-left:auto;color:var(--muted);font-size:13px}
+    .camera-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 4px 30px rgba(2, 6, 23, 0.6)
+    }
+
+    video#preview {
+      width: 100%;
+      height: 360px;
+      background: #000;
+      border-radius: 8px;
+      object-fit: cover
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px
+    }
+
+    button {
+      background: var(--accent);
+      border: 0;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: #022;
+      cursor: pointer;
+      font-weight: 600
+    }
+
+    button.ghost {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid rgba(6, 182, 212, 0.15)
+    }
+
+    .status {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 13px
+    }
 
     /* right: questions */
-    .panel{background:var(--card);padding:12px;border-radius:12px}
-    .question{font-size:18px;margin:8px 0}
-    .qmeta{color:var(--muted);font-size:13px}
-    .nav{display:flex;gap:8px;margin-top:12px}
-    .record-btn{background:#ef4444;color:#fff}
-    .recording-dot{display:inline-block;width:10px;height:10px;background:#ff3b30;border-radius:50%;box-shadow:0 0 8px rgba(255,59,48,0.7);vertical-align:middle;margin-right:6px}
+    .panel {
+      background: var(--card);
+      padding: 12px;
+      border-radius: 12px
+    }
 
-    .recordings-list{margin-top:14px;display:flex;flex-direction:column;gap:10px}
-    .rec-item{background:var(--glass);padding:10px;border-radius:8px;display:flex;gap:8px;align-items:center}
-    .rec-item video{width:160px;height:90px;border-radius:6px;object-fit:cover}
-    .rec-actions{display:flex;flex-direction:column;gap:6px}
-    a.link{color:var(--accent);font-weight:600;text-decoration:none}
+    .question {
+      font-size: 18px;
+      margin: 8px 0
+    }
 
-    footer.note{margin-top:16px;color:var(--muted);font-size:13px}
+    .qmeta {
+      color: var(--muted);
+      font-size: 13px
+    }
 
-    @media (max-width:960px){.app{grid-template-columns:1fr}video#preview{height:260px}}
+    .nav {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px
+    }
+
+    .record-btn {
+      background: #ef4444;
+      color: #fff
+    }
+
+    .recording-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background: #ff3b30;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(255, 59, 48, 0.7);
+      vertical-align: middle;
+      margin-right: 6px
+    }
+
+    .recordings-list {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px
+    }
+
+    .rec-item {
+      background: var(--glass);
+      padding: 10px;
+      border-radius: 8px;
+      display: flex;
+      gap: 8px;
+      align-items: center
+    }
+
+    .rec-item video {
+      width: 160px;
+      height: 90px;
+      border-radius: 6px;
+      object-fit: cover
+    }
+
+    .rec-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    a.link {
+      color: var(--accent);
+      font-weight: 600;
+      text-decoration: none
+    }
+
+    footer.note {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 13px
+    }
+
+    @media (max-width:960px) {
+      .app {
+        grid-template-columns: 1fr
+      }
+
+      video#preview {
+        height: 260px
+      }
+    }
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <header>
       <h1>Answer-to-Camera — демо</h1>
-      <div style="color:var(--muted);font-size:13px">Включи камеру, читай вопрос и отвечай в кадр — записывай видеоответы.</div>
+      <div style="color:var(--muted);font-size:13px">Включи камеру, читай вопрос и отвечай в кадр — записывай
+        видеоответы.</div>
     </header>
 
     <div class="app">
@@ -55,7 +201,8 @@
           <button id="toggleAudio" class="ghost">Микрофон: вкл</button>
           <div class="status" id="camStatus">Камера: выключена</div>
         </div>
-        <div style="margin-top:10px;color:var(--muted);font-size:13px">Запись сохраняется локально в браузере. Нажми <strong>«Загрузить все»</strong>, чтобы отправить ответы на сервер (ещё не работает).</div>
+        <div style="margin-top:10px;color:var(--muted);font-size:13px">Запись сохраняется локально в браузере. Нажми
+          <strong>«Загрузить все»</strong>, чтобы отправить ответы на сервер (ещё не работает).</div>
       </div>
 
       <div>
@@ -82,12 +229,14 @@
           <div id="log" style="margin-top:10px;color:var(--muted);font-size:13px"></div>
         </div>
 
-        <footer class="note">Примечание: для доступа к камере нужен HTTPS или localhost. Браузер спросит доступ к камере и микрофону.</footer>
+        <footer class="note">Примечание: для доступа к камере нужен HTTPS или localhost. Браузер спросит доступ к камере
+          и микрофону.</footer>
       </div>
     </div>
   </div>
 
   <script>
+
     // ====== Конфигурация ======
     const QUESTIONS = [
       'Как вас зовут и откуда вы?',
@@ -132,23 +281,24 @@
 
     // init UI
     qTotEl.textContent = QUESTIONS.length;
+    loadUser();
     renderQuestion();
 
-    function log(msg){ logEl.textContent = msg; }
+    function log(msg) { logEl.textContent = msg; }
 
     // ========== Camera control ============
-    async function startCamera(){
-      try{
+    async function startCamera() {
+      try {
         stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: true });
         preview.srcObject = stream;
         camStatus.textContent = 'Камера: включена';
         startCamBtn.disabled = true; stopCamBtn.disabled = false;
-      }catch(err){
+      } catch (err) {
         console.error(err); log('Ошибка доступа к камере: ' + err.message);
       }
     }
-    function stopCamera(){
-      if(stream){
+    function stopCamera() {
+      if (stream) {
         stream.getTracks().forEach(t => t.stop());
         preview.srcObject = null;
         stream = null;
@@ -159,20 +309,20 @@
     startCamBtn.addEventListener('click', startCamera);
     stopCamBtn.addEventListener('click', stopCamera);
 
-    toggleAudioBtn.addEventListener('click', ()=>{
+    toggleAudioBtn.addEventListener('click', () => {
       audioEnabled = !audioEnabled;
-      if(stream){
+      if (stream) {
         stream.getAudioTracks().forEach(t => t.enabled = audioEnabled);
       }
-      toggleAudioBtn.textContent = 'Микрофон: ' + (audioEnabled? 'вкл':'выкл');
+      toggleAudioBtn.textContent = 'Микрофон: ' + (audioEnabled ? 'вкл' : 'выкл');
     });
 
     // ========== Questions navigation ============
-    prevQ.addEventListener('click', ()=>{ if(currentQuestion>0){ currentQuestion--; renderQuestion(); } });
-    nextQ.addEventListener('click', ()=>{ if(currentQuestion<QUESTIONS.length-1){ currentQuestion++; renderQuestion(); } });
+    prevQ.addEventListener('click', () => { if (currentQuestion > 0) { currentQuestion--; renderQuestion(); } });
+    nextQ.addEventListener('click', () => { if (currentQuestion < QUESTIONS.length - 1) { currentQuestion++; renderQuestion(); } });
 
-    function renderQuestion(){
-      qIdxEl.textContent = currentQuestion+1;
+    function renderQuestion() {
+      qIdxEl.textContent = currentQuestion + 1;
       qText.textContent = QUESTIONS[currentQuestion];
       // highlight if already recorded
       // update recording list UI
@@ -180,27 +330,27 @@
     }
 
     // ========== Recording logic ============
-    function startTimer(){ elapsed = 0; timerEl.textContent = formatTime(0); clearInterval(timerInterval); timerInterval = setInterval(()=>{ elapsed++; timerEl.textContent = formatTime(elapsed); if(elapsed>=MAX_RECORD_SECONDS){ stopRecording(); } }, 1000); }
-    function stopTimer(){ clearInterval(timerInterval); timerEl.textContent = '00:00'; }
-    function formatTime(s){ const m = String(Math.floor(s/60)).padStart(2,'0'); const ss = String(s%60).padStart(2,'0'); return m + ':' + ss; }
+    function startTimer() { elapsed = 0; timerEl.textContent = formatTime(0); clearInterval(timerInterval); timerInterval = setInterval(() => { elapsed++; timerEl.textContent = formatTime(elapsed); if (elapsed >= MAX_RECORD_SECONDS) { stopRecording(); } }, 1000); }
+    function stopTimer() { clearInterval(timerInterval); timerEl.textContent = '00:00'; }
+    function formatTime(s) { const m = String(Math.floor(s / 60)).padStart(2, '0'); const ss = String(s % 60).padStart(2, '0'); return m + ':' + ss; }
 
-    startRec.addEventListener('click', ()=>{
-      if(!stream){ log('Камера не запущена'); return; }
-      if(recorder && recorder.state === 'recording'){ log('Уже идёт запись'); return; }
+    startRec.addEventListener('click', () => {
+      if (!stream) { log('Камера не запущена'); return; }
+      if (recorder && recorder.state === 'recording') { log('Уже идёт запись'); return; }
 
       recordChunks = [];
-      try{
+      try {
         // создаём MediaRecorder с трассой stream
         const options = { mimeType: 'video/webm;codecs=vp8,opus' };
         recorder = new MediaRecorder(stream, options);
-      }catch(e){
-        try{ recorder = new MediaRecorder(stream); }catch(err){ log('MediaRecorder недоступен: ' + err.message); return; }
+      } catch (e) {
+        try { recorder = new MediaRecorder(stream); } catch (err) { log('MediaRecorder недоступен: ' + err.message); return; }
       }
-      recorder.ondataavailable = ev => { if(ev.data && ev.data.size>0) recordChunks.push(ev.data); };
-      recorder.onstop = ()=>{
+      recorder.ondataavailable = ev => { if (ev.data && ev.data.size > 0) recordChunks.push(ev.data); };
+      recorder.onstop = () => {
         const blob = new Blob(recordChunks, { type: 'video/webm' });
         recordings[currentQuestion] = blob;
-        log('Запись сохранена для вопроса #' + (currentQuestion+1));
+        log('Запись сохранена для вопроса #' + (currentQuestion + 1));
         refreshRecordingsUI();
       };
       recorder.start();
@@ -208,29 +358,29 @@
       log('Запись начата...');
     });
 
-    stopRec.addEventListener('click', ()=>{ stopRecording(); });
-    function stopRecording(){ if(recorder && recorder.state === 'recording'){ recorder.stop(); stopTimer(); } }
+    stopRec.addEventListener('click', () => { stopRecording(); });
+    function stopRecording() { if (recorder && recorder.state === 'recording') { recorder.stop(); stopTimer(); } }
 
-    function refreshRecordingsUI(){
+    function refreshRecordingsUI() {
       recordingsList.innerHTML = '';
-      for(let i=0;i<QUESTIONS.length;i++){
+      for (let i = 0; i < QUESTIONS.length; i++) {
         const item = document.createElement('div'); item.className = 'rec-item';
         const left = document.createElement('div');
-        if(recordings[i]){
+        if (recordings[i]) {
           const vid = document.createElement('video'); vid.src = URL.createObjectURL(recordings[i]); vid.controls = true; vid.muted = true; left.appendChild(vid);
-        }else{
-          const placeholder = document.createElement('div'); placeholder.style.width='160px'; placeholder.style.height='90px'; placeholder.style.background='#071020'; placeholder.style.border='1px dashed rgba(255,255,255,0.04)'; left.appendChild(placeholder);
+        } else {
+          const placeholder = document.createElement('div'); placeholder.style.width = '160px'; placeholder.style.height = '90px'; placeholder.style.background = '#071020'; placeholder.style.border = '1px dashed rgba(255,255,255,0.04)'; left.appendChild(placeholder);
         }
-        const right = document.createElement('div'); right.className='rec-actions';
-        const title = document.createElement('div'); title.textContent = (i+1)+'. '+QUESTIONS[i]; title.style.fontSize='14px'; title.style.color='var(--muted)';
+        const right = document.createElement('div'); right.className = 'rec-actions';
+        const title = document.createElement('div'); title.textContent = (i + 1) + '. ' + QUESTIONS[i]; title.style.fontSize = '14px'; title.style.color = 'var(--muted)';
         right.appendChild(title);
-        if(recordings[i]){
-          const dl = document.createElement('a'); dl.href = URL.createObjectURL(recordings[i]); dl.download = 'answer_' + (i+1) + '.webm'; dl.textContent = 'Скачать'; dl.className='link';
+        if (recordings[i]) {
+          const dl = document.createElement('a'); dl.href = URL.createObjectURL(recordings[i]); dl.download = 'answer_' + (i + 1) + '.webm'; dl.textContent = 'Скачать'; dl.className = 'link';
           right.appendChild(dl);
-          const deleteBtn = document.createElement('button'); deleteBtn.textContent='Удалить'; deleteBtn.className='ghost'; deleteBtn.addEventListener('click', ()=>{ recordings[i]=null; refreshRecordingsUI(); });
+          const deleteBtn = document.createElement('button'); deleteBtn.textContent = 'Удалить'; deleteBtn.className = 'ghost'; deleteBtn.addEventListener('click', () => { recordings[i] = null; refreshRecordingsUI(); });
           right.appendChild(deleteBtn);
-        }else{
-          const recBtn = document.createElement('button'); recBtn.textContent = 'Записать сейчас'; recBtn.className='ghost'; recBtn.addEventListener('click', ()=>{ currentQuestion = i; renderQuestion(); startRec.click(); });
+        } else {
+          const recBtn = document.createElement('button'); recBtn.textContent = 'Записать сейчас'; recBtn.className = 'ghost'; recBtn.addEventListener('click', () => { currentQuestion = i; renderQuestion(); startRec.click(); });
           right.appendChild(recBtn);
         }
         item.appendChild(left); item.appendChild(right);
@@ -239,36 +389,52 @@
     }
 
     // ========== Download / Upload ==========
-    downloadAll.addEventListener('click', ()=>{
-      for(let i=0;i<recordings.length;i++){
-        if(recordings[i]){
-          const a = document.createElement('a'); a.href = URL.createObjectURL(recordings[i]); a.download = 'answer_' + (i+1) + '.webm'; document.body.appendChild(a); a.click(); a.remove();
+    downloadAll.addEventListener('click', () => {
+      for (let i = 0; i < recordings.length; i++) {
+        if (recordings[i]) {
+          const a = document.createElement('a'); a.href = URL.createObjectURL(recordings[i]); a.download = 'answer_' + (i + 1) + '.webm'; document.body.appendChild(a); a.click(); a.remove();
         }
       }
     });
 
-    uploadAll.addEventListener('click', async ()=>{
+    uploadAll.addEventListener('click', async () => {
       const form = new FormData();
       let any = false;
-      for(let i=0;i<recordings.length;i++){
-        if(recordings[i]){ form.append('answer_'+(i+1), recordings[i], 'answer_'+(i+1)+'.webm'); any = true; }
+      for (let i = 0; i < recordings.length; i++) {
+        if (recordings[i]) { form.append('answer_' + (i + 1), recordings[i], 'answer_' + (i + 1) + '.webm'); any = true; }
       }
-      if(!any){ log('Нет записей для загрузки'); return; }
+      if (!any) { log('Нет записей для загрузки'); return; }
       log('Загрузка...');
-      try{
-        const resp = await fetch(UPLOAD_ENDPOINT, { method:'POST', body: form });
+      try {
+        const resp = await fetch(UPLOAD_ENDPOINT, { method: 'POST', body: form });
         const txt = await resp.text();
         log('Сервер ответил: ' + txt);
-      }catch(err){ log('Ошибка при загрузке: ' + err.message); }
+      } catch (err) { log('Ошибка при загрузке: ' + err.message); }
     });
 
     // cleanup objectURLs on unload
-    window.addEventListener('unload', ()=>{ recordings.forEach(b=>{ if(b) URL.revokeObjectURL(b); }); });
+    window.addEventListener('unload', () => { recordings.forEach(b => { if (b) URL.revokeObjectURL(b); }); });
 
     // ====== Helpers ======
     // if page is served via http (non-localhost) then getUserMedia will be blocked in most browsers
-    if(location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1'){
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
       log('Внимание: доступ к камере разрешён только на HTTPS или на localhost.');
+    }
+
+    async function loadUser() {
+      const resp = await fetch(
+        '/api/user', {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      });
+      console.log(resp);
+      if (resp.ok) {
+        const user = await resp.json();
+        console.log('Logged in as', user.name);
+      } else {
+        // window.location.href = '/login';
+      }
     }
 
   </script>
@@ -299,4 +465,5 @@
     - Браузеры сохраняют видео в webm (vp8/opus). Для совместимости можно переконвертировать на сервере (ffmpeg).
   -->
 </body>
+
 </html>

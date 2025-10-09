@@ -1,16 +1,18 @@
 <?php
 
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
-
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
 Route::post('/auth/passwordless/send', function (Request $request) {
+    // dd($request->all());
     $data = $request->validate([
         'email' => 'nullable|email',
         'phone' => 'nullable|string',
@@ -37,21 +39,44 @@ Route::post('/auth/passwordless/send', function (Request $request) {
 
 Route::post('/auth/passwordless/verify', function (Request $request) {
     $data = $request->validate([
-        'email' => 'nullable|email',
-        'phone' => 'nullable|string',
-        'code' => 'required|string',
+        'identifier' => 'nullable|string',
+        'code' => 'required|integer',
     ]);
-
-    if (empty($data['email']) && empty($data['phone'])) {
-        return response()->json(['error' => 'Email или телефон обязателен'], 422);
+    $data['code'] = (int)$data['code'];
+    if (empty($data['identifier'])) {
+        return response()->json(['error' => 'Identifier обязателен'], 422);
     }
 
-    $identifier = $data['email'] ?? $data['phone'];
+    $identifier = $data['identifier'];
     $code = Cache::get("otp_{$identifier}");
-
     if ($code !== $data['code']) {
         return response()->json(['error' => 'Неверный код'], 422);
     }
+    Cache::forget("otp_{$identifier}");
+    $user = User::where('email', $identifier)->orWhere('phone', $identifier)->first();
+    if (!$user) {
+        $user = User::create([
+            'email' => filter_var($identifier, FILTER_VALIDATE_EMAIL) ? $identifier : null,
+            'phone' => !filter_var($identifier, FILTER_VALIDATE_EMAIL) ? $identifier : null,
+            'name' => $identifier,
+        ]);
+    }
 
-    return response()->json(['message' => 'success_and_redirect']);//, 200);
+    $token = $user->createToken('mobile')->plainTextToken;
+    return response()->json(['message' => 'authenticated', 'token' => $token]);
 });
+
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+Route::get('/login', fn() => response()->json(['error' => 'Login required'], 401))->name('login');
+
+Route::get('/whoami', function (Request $request) {
+    return [
+        'user' => $request->user(),
+        'session' => $request->session()->all(),
+        'cookies' => request()->cookies->all(),
+    ];
+});
+

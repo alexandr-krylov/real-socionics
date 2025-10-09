@@ -1,18 +1,29 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+
+RateLimiter::for('otp-send', function (Request $request) {
+    $identifier = $request->input('email') ?? $request->input('phone') ?? 'unknown';
+    $key = sha1($identifier . '|' . $request->ip());
+    return Limit::perMinute(5)->by($key);
+});
+
+RateLimiter::for('otp-verify', function (Request $request) {
+    $key = sha1($request->ip());
+    return Limit::perMinute(5)->by($key);
+});
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
 Route::post('/auth/passwordless/send', function (Request $request) {
-    // dd($request->all());
     $data = $request->validate([
         'email' => 'nullable|email',
         'phone' => 'nullable|string',
@@ -35,7 +46,7 @@ Route::post('/auth/passwordless/send', function (Request $request) {
     }
 
     return response()->json(['message' => 'code_sent']);//, 200);
-});
+})->middleware('throttle:otp-send');
 
 Route::post('/auth/passwordless/verify', function (Request $request) {
     $data = $request->validate([
@@ -64,11 +75,7 @@ Route::post('/auth/passwordless/verify', function (Request $request) {
 
     $token = $user->createToken('mobile')->plainTextToken;
     return response()->json(['message' => 'authenticated', 'token' => $token]);
-});
-
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
+})->middleware('throttle:otp-verify');
 
 Route::get('/login', fn() => response()->json(['error' => 'Login required'], 401))->name('login');
 

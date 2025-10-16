@@ -24,6 +24,8 @@ services:
     working_dir: /var/www/app/backend
     volumes:
       - ${ROOT_PATH}backend:/var/www/app/backend
+      - ${SERVER_CRT_PATH}:/etc/ssl/certs/mailcert.pem:ro
+      - ${SERVER_KEY_PATH}:/etc/ssl/private/mailkey.pem:ro
     expose:
       - "9000"
   

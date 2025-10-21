@@ -30,8 +30,17 @@ class InfobipVerifyService
     public function createApplication(string $appName): ?string
     {
         $response = Http::withHeaders($this->headers())
-            ->post("{$this->baseUrl}/verify/2/applications", [
+            ->post("{$this->baseUrl}/2fa/2/applications", [
                 'name' => $appName,
+                'enabled' => true,
+                'configuration' => [
+                    'pinAttempts' => 10,
+                    'allowMultiplePinVerifications' => true,
+                    'pinTimeToLive' => '15m',
+                    'verifyPinLimit' => '1/3s',
+                    'sendPinPerApplicationLimit' => '100/1d',
+                    'sendPinPerPhoneNumberLimit' => '10/1d',
+                ],
             ]);
 
         if ($response->failed()) {
@@ -50,8 +59,7 @@ class InfobipVerifyService
         $appId = $this->getId('application');
 
         $response = Http::withHeaders($this->headers())
-            ->post("{$this->baseUrl}/verify/2/applications/{$appId}/templates", [
-                'name' => $templateName,
+            ->post("{$this->baseUrl}/2fa/2/applications/{$appId}/messages", [
                 'pinType' => 'NUMERIC',
                 'pinLength' => 6,
                 'messageText' => $messageText,
@@ -63,9 +71,8 @@ class InfobipVerifyService
         }
 
         $data = $response->json();
-        $this->storeId('template', $data['templateId']);
-
-        return $data['templateId'];
+        $this->storeId('template', $data['messageId']);
+        return $data['messageId'];
     }
 
     /** 🔹 3. Отправка проверочного кода */
@@ -74,12 +81,11 @@ class InfobipVerifyService
         $templateId = $this->getId('template');
 
         $response = Http::withHeaders($this->headers())
-            ->post("{$this->baseUrl}/verify/2/verifications", [
+            ->post("{$this->baseUrl}/2fa/2/pin", [
                 'applicationId' => $this->getId('application'),
-                'templateId' => $templateId,
-                'destination' => [
-                    'to' => $phone,
-                ],
+                'messageId' => $templateId,
+                'from' => 'InfoSMS',
+                'to' => $phone,
             ]);
 
         if ($response->failed()) {
@@ -93,8 +99,8 @@ class InfobipVerifyService
     public function verifyCode(string $pinId, string $code): bool
     {
         $response = Http::withHeaders($this->headers())
-            ->post("{$this->baseUrl}/verify/2/verifications/{$pinId}", [
-                'code' => $code,
+            ->post("{$this->baseUrl}/2fa/2/pin/{$pinId}/verify", [
+                'pin' => $code,
             ]);
 
         if ($response->failed()) {
@@ -102,7 +108,6 @@ class InfobipVerifyService
         }
 
         $data = $response->json();
-
         return isset($data['verified']) && $data['verified'] === true;
     }
 

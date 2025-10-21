@@ -26,7 +26,7 @@ class SetupInfobipVerify extends Command
      */
     public function handle(InfobipVerifyService $service)
     {
-        $appName = $this->argument('name');
+        $appName = env('APP_NAME', 'MyApp') . '-Verify';
 
         $this->info("🔧 Creating Infobip Verify application...");
         $appId = $service->createApplication($appName);
@@ -35,7 +35,6 @@ class SetupInfobipVerify extends Command
         $this->info("📄 Creating verification template...");
         $templateId = $service->createTemplate('LoginVerification', 'Your verification code is {{pin}}.');
         $this->info("✅ Template created: {$templateId}");
-
         $this->info("🎉 Setup complete! IDs saved in storage/app/infobip.json");
     }
 }

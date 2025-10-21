@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use App\Models\Video;
+use App\Services\InfobipVerifyService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -33,56 +34,21 @@ Route::post('/auth/passwordless/send', function (Request $request) {
     if (empty($data['email']) && empty($data['phone'])) {
         return response()->json(['error' => 'Email или телефон обязателен'], 422);
     }
-
+    
     $identifier = $data['email'] ?? $data['phone'];
-    $code = random_int(100000, 999999);
-
-    Cache::put("otp_{$identifier}", $code, now()->addMinutes(5));
-
     if (isset($data['email'])) {
+        $code = random_int(100000, 999999);
+        Cache::put("otp_{$identifier}", $code, now()->addMinutes(5));
         Mail::raw("Ваш код входа: $code", fn($msg) => $msg->to($data['email'])->subject('Код для входа'));
     } else {
-        $request = new HTTP_Request2();
-        $request->setUrl(env('INFOBIP_BASE_URL', 'https://api.infobip.com') . '/2fa/2/applications');
-        $request->setMethod(HTTP_Request2::METHOD_POST);
-        $request->setConfig(array(
-            'follow_redirects' => TRUE
-        ));
-        $request->setHeader(array(
-            'Authorization' => 'App ' . env('INFOBIP_API_KEY', 'Basic'),
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json'
-        ));
-        $request->setBody(
-            '{' .
-                '"name":"2fa test application",' .
-                '"enabled":true,' .
-                '"configuration":{' .
-                    '"pinAttempts":10,' .
-                    '"allowMultiplePinVerifications":true,' .
-                    '"pinTimeToLive":"15m",' .
-                    '"verifyPinLimit":"1/3s",' .
-                    '"sendPinPerApplicationLimit":"100/1d",' .
-                    '"sendPinPerPhoneNumberLimit":"10/1d"' .
-                '}' .
-            '}'
-        );
-        try {
-            $response = $request->send();
-            if ($response->getStatus() == 200) {
-                echo $response->getBody();
-            } else {
-                echo 'Unexpected HTTP status: ' . $response->getStatus() . ' ' .
-                    $response->getReasonPhrase();
-            }
-        } catch (HTTP_Request2_Exception $e) {
-            echo 'Error: ' . $e->getMessage();
-        }
+        $res = app(App\Services\InfobipVerifyService::class)->sendCode($data['phone']);
+        $pinId = $res['pinId'];
+        Cache::put("otp_{$identifier}", $pinId, now()->addMinutes(5));
         // Пример — заглушка под SMS
         // Http::post('https://sms-provider.example.com/send', ['to' => $data['phone'], 'text' => "Ваш код: $code"]);
     }
 
-    return response()->json(['message' => 'code_sent']);//, 200);
+    return response()->json(['message' => 'code_sent' . $pinId ?? '']);//, 200);
 })->middleware('throttle:otp-send');
 
 Route::post('/auth/passwordless/verify', function (Request $request) {
@@ -96,11 +62,21 @@ Route::post('/auth/passwordless/verify', function (Request $request) {
     }
 
     $identifier = $data['identifier'];
-    $code = Cache::get("otp_{$identifier}");
-    if ($code !== $data['code']) {
-        return response()->json(['error' => 'Неверный код'], 422);
+    if (!filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+        $pinId = Cache::get("otp_{$identifier}");
+        $res = app(InfobipVerifyService::class)->verifyCode($pinId, $data['code']);
+        if (!$res) {
+            return response()->json(['error' => 'Неверный код'], 422);
+        }
+        Cache::forget("otp_{$identifier}");
+    } else {
+        $code = Cache::get("otp_{$identifier}");
+        if ($code !== $data['code']) {
+            return response()->json(['error' => 'Неверный код'], 422);
+        }
+        Cache::forget("otp_{$identifier}");
     }
-    Cache::forget("otp_{$identifier}");
+
     $user = User::where('email', $identifier)->orWhere('phone', $identifier)->first();
     if (!$user) {
         $user = User::create([

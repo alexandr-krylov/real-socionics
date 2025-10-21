@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 
 <head>
   <meta charset="utf-8" />
@@ -30,9 +30,22 @@
     }
 
     header {
+      text-align: center;
+      padding: 4px 20px;
+    }
+
+    .logo-container {
+      height: 40px;
       display: flex;
       align-items: center;
-      gap: 16px
+      justify-content: center;
+      padding: 0 20px;
+    }
+
+    .logo-container img {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
     }
 
     h1 {
@@ -185,13 +198,22 @@
 </head>
 
 <body>
-  <div class="wrap">
+  
     <header>
-      <h1>Answer-to-Camera — демо</h1>
+      <div class="logo-container">
+        <img id="logo" src="logo.png" alt="logo" />
+      </div>
+      <div id="lang-switch">
+        <button id="lang-en" data-lang="en" class="tab">EN</button>
+        <button id="lang-ru" data-lang="ru" class="tab">RU</button>
+      </div>
+    </header>
+<div class="wrap">
+  <section class="hero">
+            <h1>Answer-to-Camera — демо</h1>
       <div style="color:var(--muted);font-size:13px">Включи камеру, читай вопрос и отвечай в кадр — записывай
         видеоответы.</div>
-    </header>
-
+        </section>
     <div class="app">
       <div class="camera-card">
         <video id="preview" autoplay muted playsinline></video>
@@ -249,6 +271,7 @@
     const UPLOAD_ENDPOINT = '/upload.php'; // изменить при необходимости
 
     // ====== Элементы ======
+    const token = localStorage.getItem('token');
     const preview = document.getElementById('preview');
     const startCamBtn = document.getElementById('startCam');
     const stopCamBtn = document.getElementById('stopCam');
@@ -405,8 +428,23 @@
       }
       if (!any) { log('Нет записей для загрузки'); return; }
       log('Загрузка...');
+      if (!token) {
+        window.location.href = '/';
+      }
       try {
-        const resp = await fetch(UPLOAD_ENDPOINT, { method: 'POST', body: form });
+        const resp = await fetch(
+          '/api/upload', {
+          headers: {
+            'Authorization': 'Bearer ' + token
+          },
+          method: 'POST',
+          body: form
+        }
+        );
+        if (resp.status === 401) { // Unauthorized
+          localStorage.removeItem('token');
+          window.location.href = '/';
+        }
         const txt = await resp.text();
         log('Сервер ответил: ' + txt);
       } catch (err) { log('Ошибка при загрузке: ' + err.message); }
@@ -425,7 +463,7 @@
       const resp = await fetch(
         '/api/user', {
         headers: {
-          'Authorization': 'Bearer ' + localStorage.getItem('token')
+          'Authorization': 'Bearer ' + token
         }
       });
       console.log(resp);

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\Video;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -41,6 +42,42 @@ Route::post('/auth/passwordless/send', function (Request $request) {
     if (isset($data['email'])) {
         Mail::raw("Ваш код входа: $code", fn($msg) => $msg->to($data['email'])->subject('Код для входа'));
     } else {
+        $request = new HTTP_Request2();
+        $request->setUrl(env('INFOBIP_BASE_URL', 'https://api.infobip.com') . '/2fa/2/applications');
+        $request->setMethod(HTTP_Request2::METHOD_POST);
+        $request->setConfig(array(
+            'follow_redirects' => TRUE
+        ));
+        $request->setHeader(array(
+            'Authorization' => 'App ' . env('INFOBIP_API_KEY', 'Basic'),
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json'
+        ));
+        $request->setBody(
+            '{' .
+                '"name":"2fa test application",' .
+                '"enabled":true,' .
+                '"configuration":{' .
+                    '"pinAttempts":10,' .
+                    '"allowMultiplePinVerifications":true,' .
+                    '"pinTimeToLive":"15m",' .
+                    '"verifyPinLimit":"1/3s",' .
+                    '"sendPinPerApplicationLimit":"100/1d",' .
+                    '"sendPinPerPhoneNumberLimit":"10/1d"' .
+                '}' .
+            '}'
+        );
+        try {
+            $response = $request->send();
+            if ($response->getStatus() == 200) {
+                echo $response->getBody();
+            } else {
+                echo 'Unexpected HTTP status: ' . $response->getStatus() . ' ' .
+                    $response->getReasonPhrase();
+            }
+        } catch (HTTP_Request2_Exception $e) {
+            echo 'Error: ' . $e->getMessage();
+        }
         // Пример — заглушка под SMS
         // Http::post('https://sms-provider.example.com/send', ['to' => $data['phone'], 'text' => "Ваш код: $code"]);
     }
@@ -86,4 +123,25 @@ Route::get('/whoami', function (Request $request) {
         'cookies' => request()->cookies->all(),
     ];
 });
+
+Route::post('/upload', function (Request $request) {
+    $nVideo = 1;
+    // dd($request->hasFile('answer_' . $nVideo), $request->all());
+    while ($request->hasFile('answer_' . $nVideo)) {
+        $request->validate([
+            "answer_$nVideo" => 'required|file|mimetypes:video/webm|max:204800'
+        ]);
+
+        $path = $request->file("answer_$nVideo")->store('videos', 'private');
+        Video::create([
+            'user_id' => $request->user()->id,
+            'filename' => $path,
+            'original_filename' => $request->file("answer_$nVideo")->getClientOriginalName(),
+            'filesize' => $request->file("answer_$nVideo")->getSize(),
+            'mime_type' => $request->file("answer_$nVideo")->getClientMimeType(),
+        ]);
+        $nVideo++;
+    }
+    return response()->json(['path' => $path]);
+})->middleware('auth:sanctum');
 

@@ -22,9 +22,11 @@ services:
       context: .
       dockerfile: docker/php/Dockerfile
     container_name: php
+
     working_dir: /var/www/app/backend
     volumes:
       - ${ROOT_PATH}backend:/var/www/app/backend
+      - ./docker/php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     expose:
       - "9000"
   

@@ -48,7 +48,7 @@ Route::post('/auth/passwordless/send', function (Request $request) {
         // Http::post('https://sms-provider.example.com/send', ['to' => $data['phone'], 'text' => "Ваш код: $code"]);
     }
 
-    return response()->json(['message' => 'code_sent' . $pinId ?? '']);//, 200);
+    return response()->json(['message' => 'code_sent']);//, 200);
 })->middleware('throttle:otp-send');
 
 Route::post('/auth/passwordless/verify', function (Request $request) {

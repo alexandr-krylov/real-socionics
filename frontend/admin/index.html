@@ -5,6 +5,174 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Admin Panel</title>
+    <style>
+        :root {
+            --bg: #f6f9fc;
+            --card: #fff;
+            --accent: #2563eb;
+            --muted: #6b7280
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, Segoe UI, Roboto, -apple-system, Arial, sans-serif;
+            background: linear-gradient(180deg, #eef2ff, #f8fafc);
+            color: #111
+        }
+
+        header {
+            text-align: center;
+            padding: 4px 20px;
+        }
+
+        .logo-container {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+        }
+
+        .logo-container img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .wrap {
+            max-width: 760px;
+            margin: 3vh auto;
+            padding: 24px
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 6px 20px rgba(16, 24, 40, 0.08)
+        }
+
+        h1 {
+            margin: 0 0 6px;
+            font-size: 20px
+        }
+
+        p.lead {
+            margin: 0 0 18px;
+            color: var(--muted)
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px
+        }
+
+        .tab {
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--muted);
+            cursor: pointer
+        }
+
+        .tab.active {
+            background: rgba(37, 99, 235, 0.08);
+            border-color: rgba(37, 99, 235, 0.16);
+            color: var(--accent);
+            font-weight: 600
+        }
+
+        form .field {
+            display: grid;
+            grid-template-columns: 150px 1fr; /* 150px для label, остальное для input */
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px
+        }
+
+        label {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 6px
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #e6eef6;
+            font-size: 15px
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 12px
+        }
+
+        button.primary {
+            background: var(--accent);
+            color: #fff;
+            border: 0;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer
+        }
+
+        button.ghost {
+            background: transparent;
+            border: 1px solid #e6eef6;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 13px;
+            margin-left: 8px
+        }
+
+        .status {
+            margin-top: 12px;
+            color: var(--muted);
+            font-size: 14px
+        }
+
+        .otp-box {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px
+        }
+
+        .otp-box input {
+            width: 3rem;
+            text-align: center;
+            font-size: 18px;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #e6eef6
+        }
+
+        footer {
+            margin-top: 18px;
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        @media (max-width:640px) {
+            .wrap {
+                padding: 12px
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -17,7 +185,37 @@
             <button id="lang-ru" data-lang="ru" class="tab">RU</button>
         </div>
     </header>
-    <div id="app"></div>
+    <div class="wrap">
+        <section class="hero">
+            <h1 id="welcome-title"></h1>
+            <p id="welcome-text"></p>
+            <p id="auth-text"></p>
+        </section>
+        <div class="card" role="main">
+            <h1 id="auth-title"></h1>
+            <p id="auth-lead" class="lead"></p>
+            <form id="authForm" autocomplete="off">
+                <div class="field" id="field-login">
+                    <label for="login">Login</label>
+                    <input id="login" name="login" type="text" placeholder="my-login" required />
+                </div>
+
+                <div class="field" id="field-password">
+                    <label id="password-label" for="password">Password</label>
+                    <input id="password" name="password" type="password" placeholder="my-password" />
+                </div>
+
+                <div class="actions">
+                    <button class="primary" id="sendBtn" type="submit">Enter</button>
+                    <div id="passwordless-hint"class="hint"></div>
+                </div>
+
+                <div class="status" id="status">&nbsp;</div>
+            </form>
+
+            <footer id="footer"></footer>
+        </div>
+    </div>
 </body>
 
 </html

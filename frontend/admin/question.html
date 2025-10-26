@@ -1,23 +1,285 @@
 <!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Admin Panel - Question</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Questions</title>
+  <style>
+    :root {
+      --bg: #f6f9fc;
+      --card: #fff;
+      --accent: #2563eb;
+      --muted: #6b7280;
+      --border: #e6eef6;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      display: flex;
+      min-height: 100vh;
+      font-family: Inter, system-ui, Segoe UI, Roboto, -apple-system, Arial, sans-serif;
+      background: linear-gradient(180deg, #eef2ff, #f8fafc);
+      color: #111;
+    }
+
+    aside {
+      width: 220px;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 10px;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .logo-container {
+      height: 50px;
+      margin-bottom: 20px;
+    }
+
+    .logo-container img {
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    nav {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: var(--muted);
+      padding: 10px 16px;
+      border-radius: 8px;
+      margin: 4px 8px;
+      transition: background 0.2s;
+    }
+
+    nav a.active,
+    nav a:hover {
+      background: rgba(37, 99, 235, 0.08);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .question-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .question-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 4px 12px rgba(16, 24, 40, 0.08);
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+
+    .question-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(16, 24, 40, 0.12);
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .question-header span {
+      font-weight: 600;
+    }
+
+    .question-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .question-actions button {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 6px;
+      padding: 6px 10px;
+      cursor: pointer;
+      color: var(--muted);
+      transition: background 0.2s;
+    }
+
+    .question-actions button:hover {
+      background: rgba(37, 99, 235, 0.08);
+      color: var(--accent);
+    }
+
+    textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 15px;
+      resize: vertical;
+      margin-top: 8px;
+    }
+
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .controls button {
+      border: none;
+      border-radius: 6px;
+      padding: 10px 16px;
+      font-size: 15px;
+      cursor: pointer;
+      background: var(--accent);
+      color: white;
+      transition: background 0.2s;
+    }
+
+    .controls button:hover {
+      background: #1e40af;
+    }
+
+    @media (max-width: 640px) {
+      aside {
+        display: none;
+      }
+      main {
+        padding: 12px;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <header>
-        <div class="logo-container">
-            <img id="logo" src="logo.png" alt="logo" />
-        </div>
-        <div id="lang-switch">
-            <button id="lang-en" data-lang="en" class="tab">EN</button>
-            <button id="lang-ru" data-lang="ru" class="tab">RU</button>
-        </div>
-    </header>
-    <div id="app"></div>
-</body>
+  <aside>
+    <div class="logo-container">
+      <img src="logo.png" alt="Logo" />
+    </div>
+    <nav>
+      <a href="/admin/question" class="active">Questions</a>
+      <a href="/admin/interview">Interviews</a>
+    </nav>
+  </aside>
 
-</html
+  <main>
+    <header>
+      <h1>Questions</h1>
+    </header>
+
+    <section class="question-list" id="questionList"></section>
+
+    <div class="controls">
+      <button id="addBtn">➕ Add Question</button>
+      <button id="saveBtn">💾 Save</button>
+    </div>
+  </main>
+
+  <script>
+    const list = document.getElementById('questionList');
+    const addBtn = document.getElementById('addBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    let questions = [
+        { "id": 3, "text": "Как тебя зовут?" },
+        { "id": 7, "text": "Чем ты занимаешься?" },
+        { "id": null, "text": "Новый вопрос" }
+    ];
+
+    function renderQuestions() {
+      list.innerHTML = '';
+      questions.forEach((question, i) => {
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.dataset.id = question.id || '';
+        card.dataset.position = i + 1;
+        card.innerHTML = `
+          <div class="question-header">
+            <span>Question ${i + 1}</span>
+          </div>
+          <textarea>${question.text}</textarea>
+          <div class="question-actions">
+            <button onclick="moveUp(${i})">⬆️</button>
+            <button onclick="moveDown(${i})">⬇️</button>
+            <button onclick="removeQuestion(${i})">🗑️</button>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function addQuestion() {
+      questions.push({ "id": null, "text": "", "position": null });
+      renderQuestions();
+    }
+
+    function moveUp(i) {
+      if (i === 0) return;
+      [questions[i - 1], questions[i]] = [questions[i], questions[i - 1]];
+      renderQuestions();
+    }
+
+    function moveDown(i) {
+      if (i === questions.length - 1) return;
+      [questions[i + 1], questions[i]] = [questions[i], questions[i + 1]];
+      renderQuestions();
+    }
+
+    function removeQuestion(i) {
+      questions.splice(i, 1);
+      renderQuestions();
+    }
+
+    function saveQuestions() {
+      questions = [...list.querySelectorAll('textarea')].map(t => t.value.trim());
+      fetch('/api/admin/question', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questions })
+      })
+      .then(r => r.json())
+      .then(() => alert('Saved!'))
+      .catch(e => alert('Error: ' + e));
+    }
+
+    // fetch('/api/admin/question')
+    //   .then(r => r.json())
+    //   .then(data => {
+    //     questions = data.questions || [];
+    //     renderQuestions();
+    //   });
+    renderQuestions();
+    addBtn.addEventListener('click', addQuestion);
+    saveBtn.addEventListener('click', saveQuestions);
+  </script>
+</body>
+</html>

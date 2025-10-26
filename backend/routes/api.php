@@ -6,6 +6,7 @@ use App\Services\InfobipVerifyService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
@@ -120,4 +121,19 @@ Route::post('/upload', function (Request $request) {
     }
     return response()->json(['path' => $path]);
 })->middleware('auth:sanctum');
+
+Route::post('/admin/login', function (Request $request) {
+    
+    $data = $request->validate([
+        'login' => 'required|string',
+        'password' => 'required|string',
+    ]);
+    $user = User::where('name', $data['login'])->first();
+    if (!$user || !Hash::check($data['password'], $user->password)) {
+        return response()->json(['error' => 'Invalid credentials'], 401);
+    }
+
+    $token = $user->createToken('admin')->plainTextToken;
+    return response()->json(['message' => 'authenticated', 'token' => $token]);
+});
 

@@ -219,7 +219,6 @@
 
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            sendBtn.disabled = true;
             const payload = {};
             payload.login = loginInput.value.trim();
             payload.password = passwordInput.value.trim();
@@ -230,13 +229,14 @@
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
                 });
                 const data = await resp.json();
+                console.log('data', data);
                 if (resp.ok) {
-                    statusEl.textContent = translations[data.message] || translations.code_sent;
+                    localStorage.setItem('token', data.token);
+                    window.location.href = '/admin/answer';
                 } else {
                     statusEl.textContent = translations[data.error] || translations.error + ': ' + resp.status;
                 }
             } catch (err) { statusEl.textContent = translations.net_error + ': ' + err.message; }
-            sendBtn.disabled = false;
         });
 
         function loadLang(lang) {

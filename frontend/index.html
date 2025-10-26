@@ -232,7 +232,6 @@
                     </div>
                     <div class="actions">
                         <button class="primary" id="verifyBtn" type="button"></button>
-                        <button class="ghost" id="resendBtn" type="button"></button>
                     </div>
                 </div>
 
@@ -252,7 +251,6 @@
         const statusEl = document.getElementById('status');
         const otpArea = document.getElementById('otpArea');
         const verifyBtn = document.getElementById('verifyBtn');
-        const resendBtn = document.getElementById('resendBtn');
         const otpInputs = document.getElementById('otpInputs');
         const currentLang = localStorage.getItem('lang') || 'en';
         const langSwitches = document.querySelectorAll('#lang-switch button');
@@ -338,15 +336,6 @@
             verifyBtn.disabled = false;
         });
 
-        resendBtn.addEventListener('click', () => {
-            if (lastIdentifier) {
-             /* можно вызвать отправку снова, с бэкенда rate-limit */
-                authForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-
-                statusEl.textContent = translations.resent;
-            }
-        });
-
         // focus helpers
         function focusOtp() { const first = otpInputs.querySelector('input'); if (first) first.focus(); }
         otpInputs.addEventListener('input', (e) => {
@@ -392,8 +381,6 @@
                 document.getElementById('passwordless-hint').textContent = t.passwordless_hint;
                 document.getElementById('otp-label').textContent = t.otp_label;
                 verifyBtn.textContent = t.verify_btn;
-                resendBtn.textContent = t.resend_btn;
-                document.getElementById('footer').textContent = t.footer;
                 langSwitches.forEach(b => b.classList.toggle('active', false));
                 document.getElementById('lang-' + lang).classList.toggle('active', true);
             });

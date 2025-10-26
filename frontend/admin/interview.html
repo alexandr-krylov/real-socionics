@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Video Interviews</title>
+  <style>
+    :root {
+      --bg: #f6f9fc;
+      --card: #fff;
+      --accent: #2563eb;
+      --muted: #6b7280;
+      --border: #e6eef6;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      display: flex;
+      min-height: 100vh;
+      font-family: Inter, system-ui, Segoe UI, Roboto, -apple-system, Arial, sans-serif;
+      background: linear-gradient(180deg, #eef2ff, #f8fafc);
+      color: #111;
+    }
+
+    aside {
+      width: 220px;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 10px;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .logo-container {
+      height: 50px;
+      margin-bottom: 20px;
+    }
+
+    .logo-container img {
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    nav {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: var(--muted);
+      padding: 10px 16px;
+      border-radius: 8px;
+      margin: 4px 8px;
+      transition: background 0.2s;
+    }
+
+    nav a.active,
+    nav a:hover {
+      background: rgba(37, 99, 235, 0.08);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .interview-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .interview-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 4px 12px rgba(16, 24, 40, 0.08);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .interview-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(16, 24, 40, 0.12);
+    }
+
+    .interview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .interview-user {
+      font-weight: 600;
+    }
+
+    .interview-time {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .interview-duration {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .interview-card.viewed {
+      opacity: 0.7;
+    }
+
+    .details {
+      margin-top: 12px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .details video {
+      width: 100%;
+      max-height: 320px;
+      border-radius: 8px;
+      background: #000;
+    }
+
+    .details textarea {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 15px;
+      resize: vertical;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 24px;
+      gap: 6px;
+    }
+
+    .pagination button {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+
+    .pagination button.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    @media (max-width: 640px) {
+      aside {
+        display: none;
+      }
+
+      main {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <aside>
+    <div class="logo-container">
+      <img src="logo.png" alt="Logo" />
+    </div>
+    <nav>
+      <a href="/admin/question">Questions</a>
+      <a href="/admin/answer" class="active">Interviews</a>
+      <a href="/admin/users">Users</a>
+    </nav>
+  </aside>
+
+  <main>
+    <header>
+      <h1>Video Interviews</h1>
+    </header>
+
+    <section class="interview-list" id="interviewList">
+      <!-- JS will populate -->
+    </section>
+
+    <div class="pagination" id="pagination"></div>
+  </main>
+
+  <script>
+    const interviews = [
+      {
+        id: 1,
+        user: 'John Doe',
+        time: '2025-10-19 14:23',
+        duration: '3:20',
+        viewed: false,
+        videos: ['video1.mp4', 'video2.mp4']
+      },
+      {
+        id: 2,
+        user: 'Jane Smith',
+        time: '2025-10-18 10:45',
+        duration: '5:10',
+        viewed: true,
+        videos: ['video3.mp4']
+      },
+      {
+        id: 3,
+        user: 'Alex Brown',
+        time: '2025-10-17 09:20',
+        duration: '4:30',
+        viewed: false,
+        videos: ['video4.mp4']
+      }
+    ];
+
+    const list = document.getElementById('interviewList');
+
+    interviews.forEach(int => {
+      const card = document.createElement('div');
+      card.className = 'interview-card' + (int.viewed ? ' viewed' : '');
+      card.innerHTML = `
+        <div class="interview-header">
+          <span class="interview-user">${int.user}</span>
+          <span class="interview-time">${int.time}</span>
+        </div>
+        <div class="interview-duration">Duration: ${int.duration}</div>
+        <div class="details">
+          ${int.videos.map(v => `<video controls src="${v}"></video>`).join('')}
+          <textarea placeholder="Write a comment..."></textarea>
+        </div>
+      `;
+      card.addEventListener('click', () => {
+        const details = card.querySelector('.details');
+        details.style.display = details.style.display === 'flex' ? 'none' : 'flex';
+        card.classList.add('viewed');
+      });
+      list.appendChild(card);
+    });
+
+    // Simple static pagination placeholder
+    const pagination = document.getElementById('pagination');
+    pagination.innerHTML = `
+      <button class="active">1</button>
+      <button>2</button>
+      <button>3</button>
+    `;
+  </script>
+</body>
+
+</html>

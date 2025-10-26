@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Admin Panel</title>
+    <title>Admin Panel - Login</title>
     <style>
         :root {
             --bg: #f6f9fc;
@@ -64,12 +64,6 @@
         p.lead {
             margin: 0 0 18px;
             color: var(--muted)
-        }
-
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 18px
         }
 
         .tab {
@@ -146,21 +140,6 @@
             font-size: 14px
         }
 
-        .otp-box {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px
-        }
-
-        .otp-box input {
-            width: 3rem;
-            text-align: center;
-            font-size: 18px;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #e6eef6
-        }
-
         footer {
             margin-top: 18px;
             color: var(--muted);
@@ -216,6 +195,60 @@
             <footer id="footer"></footer>
         </div>
     </div>
+    <script>
+        const langSwitches = document.querySelectorAll('#lang-switch button');
+        const currentLang = localStorage.getItem('lang') || 'en';
+        const sendBtn = document.getElementById('sendBtn');
+        const authForm = document.getElementById('authForm');
+        const loginInput = document.getElementById('login');
+        const passwordInput = document.getElementById('password');
+        const statusEl = document.getElementById('status');
+
+        let translations = {};
+        loadLang(currentLang);
+
+        langSwitches.forEach(btn => {
+            btn.addEventListener('click', () => {
+                langSwitches.forEach(b => b.classList.toggle('active', false));
+                btn.classList.toggle('active', true);
+                const currentLang = btn.dataset.lang;
+                localStorage.setItem('lang', currentLang);
+                loadLang(currentLang);
+            });
+        });
+
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            sendBtn.disabled = true;
+            const payload = {};
+            payload.login = loginInput.value.trim();
+            payload.password = passwordInput.value.trim();
+            payload.lang = currentLang;
+
+            try {
+                const resp = await fetch('/api/admin/login', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                });
+                const data = await resp.json();
+                if (resp.ok) {
+                    statusEl.textContent = translations[data.message] || translations.code_sent;
+                } else {
+                    statusEl.textContent = translations[data.error] || translations.error + ': ' + resp.status;
+                }
+            } catch (err) { statusEl.textContent = translations.net_error + ': ' + err.message; }
+            sendBtn.disabled = false;
+        });
+
+        function loadLang(lang) {
+            fetch(`/lang/${lang}.json`)
+            .then(r => r.json())
+            .then(t => {
+                translations = t;
+                langSwitches.forEach(b => b.classList.toggle('active', false));
+                document.getElementById('lang-' + lang).classList.toggle('active', true);
+            });
+        }
+    </script>
 </body>
 
-</html
+</html>

@@ -170,6 +170,22 @@
       background: #1e40af;
     }
 
+    .tab {
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--muted);
+      cursor: pointer
+      }
+
+    .tab.active {
+      background: rgba(37, 99, 235, 0.08);
+      border-color: rgba(37, 99, 235, 0.16);
+      color: var(--accent);
+      font-weight: 600
+    }
+
     @media (max-width: 640px) {
       aside {
         display: none;
@@ -195,6 +211,10 @@
   <main>
     <header>
       <h1>Questions</h1>
+      <div id="lang-switch">
+            <button id="lang-en" data-lang="en" class="tab">EN</button>
+            <button id="lang-ru" data-lang="ru" class="tab">RU</button>
+        </div>
     </header>
 
     <section class="question-list" id="questionList"></section>
@@ -210,9 +230,13 @@
     const list = document.getElementById('questionList');
     const addBtn = document.getElementById('addBtn');
     const saveBtn = document.getElementById('saveBtn');
+    let currentLang = localStorage.getItem('lang') || 'en';
+    const langSwitches = document.querySelectorAll('#lang-switch button');
     let questions = [];
     loadUser();
-
+    loadQuestions();
+    langSwitches.forEach(b => b.classList.toggle('active', false));
+    document.getElementById('lang-' + currentLang).classList.toggle('active', true);
     function renderQuestions() {
       list.innerHTML = '';
       questions.forEach((question, i) => {
@@ -237,7 +261,7 @@
     }
 
     function addQuestion() {
-      questions.push({ "id": null, "question": "", "position": null });
+      questions.push({ "id": null, "question": "", "position": null, "lang": currentLang });
       renderQuestions();
     }
 
@@ -259,7 +283,7 @@
     }
 
     function saveQuestions() {
-      fetch('/api/admin/question', {
+      fetch(`/api/admin/question?lang=${encodeURIComponent(currentLang)}`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -272,20 +296,21 @@
       .then(() => alert('Saved!'))
       .catch(e => alert('Error: ' + e));
     }
-
-    fetch('/api/admin/question', {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
-      }
-    })
+    function loadQuestions() {
+      console.log('currentLang', currentLang);
+      fetch(`/api/admin/question?lang=${encodeURIComponent(currentLang)}`, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        }
+      })
       .then(r => r.json())
       .then(data => {
         questions = data.questions || [];
         renderQuestions();
       });
-    renderQuestions();
+    }
     addBtn.addEventListener('click', addQuestion);
     saveBtn.addEventListener('click', saveQuestions);
     async function loadUser() {
@@ -307,6 +332,15 @@
       const textarea = list.querySelectorAll('textarea')[i];
       questions[i].question = textarea.value;
     }
+    langSwitches.forEach(btn => {
+      btn.addEventListener('click', () => {
+        langSwitches.forEach(b => b.classList.toggle('active', false));
+        btn.classList.toggle('active', true);
+        currentLang = btn.dataset.lang;
+        localStorage.setItem('lang', currentLang);
+        loadQuestions();
+      });
+    });
   </script>
 </body>
 </html>

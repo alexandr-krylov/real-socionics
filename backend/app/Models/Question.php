@@ -9,5 +9,6 @@ class Question extends Model
     protected $fillable = [
         'question',
         'position',
+        'lang',
     ];
 }

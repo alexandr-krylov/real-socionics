@@ -131,7 +131,7 @@ Route::post('/admin/login', function (Request $request) {
 });
 
 Route::get('/admin/question', function (Request $request) {
-    $questions = Question::orderBy('position')->get();
+    $questions = Question::where('lang', $request->query('lang', 'en'))->orderBy('position')->get();
     return response()->json(['questions' => $questions]);
 })->middleware('auth:sanctum');
 
@@ -144,13 +144,14 @@ Route::post('/admin/question', function (Request $request) {
     ]);
 
     // Clear existing questions
-    Question::truncate();
+    Question::where('lang', $request->input('lang', 'en'))->delete();
 
     // Re-insert questions with new positions
     foreach ($data['questions'] as $index => $qData) {
         Question::create([
             'question' => $qData['question'],
             'position' => $qData['position'] ?? $index,
+            'lang' => $request->input('lang', 'en'),
         ]);
     }
 

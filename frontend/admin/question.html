@@ -206,18 +206,17 @@
   </main>
 
   <script>
+    const token = localStorage.getItem('token');
     const list = document.getElementById('questionList');
     const addBtn = document.getElementById('addBtn');
     const saveBtn = document.getElementById('saveBtn');
-    let questions = [
-        { "id": 3, "text": "Как тебя зовут?" },
-        { "id": 7, "text": "Чем ты занимаешься?" },
-        { "id": null, "text": "Новый вопрос" }
-    ];
+    let questions = [];
+    loadUser();
 
     function renderQuestions() {
       list.innerHTML = '';
       questions.forEach((question, i) => {
+        questions[i].position = i + 1;
         const card = document.createElement('div');
         card.className = 'question-card';
         card.dataset.id = question.id || '';
@@ -226,7 +225,7 @@
           <div class="question-header">
             <span>Question ${i + 1}</span>
           </div>
-          <textarea>${question.text}</textarea>
+          <textarea oninput="updateQuestion(${i})">${question.question}</textarea>
           <div class="question-actions">
             <button onclick="moveUp(${i})">⬆️</button>
             <button onclick="moveDown(${i})">⬇️</button>
@@ -238,7 +237,7 @@
     }
 
     function addQuestion() {
-      questions.push({ "id": null, "text": "", "position": null });
+      questions.push({ "id": null, "question": "", "position": null });
       renderQuestions();
     }
 
@@ -260,10 +259,13 @@
     }
 
     function saveQuestions() {
-      questions = [...list.querySelectorAll('textarea')].map(t => t.value.trim());
       fetch('/api/admin/question', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+         },
         body: JSON.stringify({ questions })
       })
       .then(r => r.json())
@@ -271,15 +273,40 @@
       .catch(e => alert('Error: ' + e));
     }
 
-    // fetch('/api/admin/question')
-    //   .then(r => r.json())
-    //   .then(data => {
-    //     questions = data.questions || [];
-    //     renderQuestions();
-    //   });
+    fetch('/api/admin/question', {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      }
+    })
+      .then(r => r.json())
+      .then(data => {
+        questions = data.questions || [];
+        renderQuestions();
+      });
     renderQuestions();
     addBtn.addEventListener('click', addQuestion);
     saveBtn.addEventListener('click', saveQuestions);
+    async function loadUser() {
+      const resp = await fetch(
+        '/api/user', {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        }
+      });
+      if (resp.ok) {
+        const user = await resp.json();
+      } else {
+        window.location.href = '/admin';
+      }
+    }
+    function updateQuestion(i) {
+      const textarea = list.querySelectorAll('textarea')[i];
+      questions[i].question = textarea.value;
+    }
   </script>
 </body>
 </html>

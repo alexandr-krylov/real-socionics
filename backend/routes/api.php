@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use App\Models\Video;
+use App\Models\Question;
 use App\Services\InfobipVerifyService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -93,14 +94,6 @@ Route::post('/auth/passwordless/verify', function (Request $request) {
 
 Route::get('/login', fn() => response()->json(['error' => 'Login required'], 401))->name('login');
 
-Route::get('/whoami', function (Request $request) {
-    return [
-        'user' => $request->user(),
-        'session' => $request->session()->all(),
-        'cookies' => request()->cookies->all(),
-    ];
-});
-
 Route::post('/upload', function (Request $request) {
     $nVideo = 1;
     // dd($request->hasFile('answer_' . $nVideo), $request->all());
@@ -137,3 +130,29 @@ Route::post('/admin/login', function (Request $request) {
     return response()->json(['message' => 'authenticated', 'token' => $token]);
 });
 
+Route::get('/admin/question', function (Request $request) {
+    $questions = Question::orderBy('position')->get();
+    return response()->json(['questions' => $questions]);
+})->middleware('auth:sanctum');
+
+Route::post('/admin/question', function (Request $request) {
+    $data = $request->validate([
+        'questions' => 'required|array',
+        'questions.*.id' => 'nullable|integer|exists:questions,id',
+        'questions.*.question' => 'required|string',
+        'questions.*.position' => 'integer',
+    ]);
+
+    // Clear existing questions
+    Question::truncate();
+
+    // Re-insert questions with new positions
+    foreach ($data['questions'] as $index => $qData) {
+        Question::create([
+            'question' => $qData['question'],
+            'position' => $qData['position'] ?? $index,
+        ]);
+    }
+
+    return response()->json(['message' => 'Questions updated']);
+})->middleware('auth:sanctum');

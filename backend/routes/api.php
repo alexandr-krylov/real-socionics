@@ -96,7 +96,6 @@ Route::get('/login', fn() => response()->json(['error' => 'Login required'], 401
 
 Route::post('/upload', function (Request $request) {
     $nVideo = 1;
-    // dd($request->hasFile('answer_' . $nVideo), $request->all());
     while ($request->hasFile('answer_' . $nVideo)) {
         $request->validate([
             "answer_$nVideo" => 'required|file|mimetypes:video/webm|max:204800'

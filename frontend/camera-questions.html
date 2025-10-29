@@ -329,7 +329,6 @@
     qTotEl.textContent = questions.length;
     loadUser();
     
-    
     // ;
     // renderQuestion();
     
@@ -574,8 +573,8 @@
         renderQuestion();
       });
     }
-    function loadLang(lang) {
-      fetch(`/camera-questions-lang/${lang}.json`)
+    async function loadLang(lang) {
+      await fetch(`/camera-questions-lang/${lang}.json`)
       .then(r => r.json())
       .then(t => {
         translations = t;

@@ -214,65 +214,123 @@
   </main>
 
   <script>
-    const interviews = [
-      {
-        id: 1,
-        user: 'John Doe',
-        time: '2025-10-19 14:23',
-        duration: '3:20',
-        viewed: false,
-        videos: ['video1.mp4', 'video2.mp4']
-      },
-      {
-        id: 2,
-        user: 'Jane Smith',
-        time: '2025-10-18 10:45',
-        duration: '5:10',
-        viewed: true,
-        videos: ['video3.mp4']
-      },
-      {
-        id: 3,
-        user: 'Alex Brown',
-        time: '2025-10-17 09:20',
-        duration: '4:30',
-        viewed: false,
-        videos: ['video4.mp4']
-      }
-    ];
+  const list = document.getElementById('interviewList');
+  const token = localStorage.getItem('token');
 
-    const list = document.getElementById('interviewList');
+  loadInterviews();
 
-    interviews.forEach(int => {
-      const card = document.createElement('div');
-      card.className = 'interview-card' + (int.viewed ? ' viewed' : '');
-      card.innerHTML = `
-        <div class="interview-header">
-          <span class="interview-user">${int.user}</span>
-          <span class="interview-time">${int.time}</span>
-        </div>
-        <div class="interview-duration">Duration: ${int.duration}</div>
-        <div class="details">
-          ${int.videos.map(v => `<video controls src="${v}"></video>`).join('')}
-          <textarea placeholder="Write a comment..."></textarea>
-        </div>
-      `;
-      card.addEventListener('click', () => {
-        const details = card.querySelector('.details');
-        details.style.display = details.style.display === 'flex' ? 'none' : 'flex';
-        card.classList.add('viewed');
-      });
-      list.appendChild(card);
-    });
+  // 🔹 Основная функция загрузки интервью
+  function loadInterviews() {
+    fetch('/api/admin/interviews', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+      .then(r => r.json())
+      .then(response => {
+        const interviews = response.interviews || [];
+        list.innerHTML = '';
 
-    // Simple static pagination placeholder
-    // const pagination = document.getElementById('pagination');
-    // pagination.innerHTML = `
-    //   <button class="active">1</button>
-    //   <button>2</button>
-    //   <button>3</button>
-    // `;
-  </script>
+        interviews.forEach(interview => {
+          const card = document.createElement('div');
+          card.className = 'interview-card';
+          card.dataset.id = interview.id;
+
+          card.innerHTML = `
+            <div class="interview-header">
+              <span class="interview-user">${interview.user}</span>
+              <span class="interview-time">${interview.time}</span>
+            </div>
+            <div class="interview-duration">Videos: ${interview.videos.length}</div>
+            <div class="details" style="display: none;">
+              <div class="video-list"></div> <!-- 🔸 контейнер для видео -->
+              <div class="comment-section">
+                <textarea placeholder="Write a comment...">${interview.comment || ''}</textarea>
+                <button class="save-comment">💾 Save comment</button>
+              </div>
+            </div>
+          `;
+
+          // 🔹 Разворачиваем карточку по клику только по заголовку, а не при вводе текста
+          const header = card.querySelector('.interview-header');
+          const details = card.querySelector('.details');
+          header.addEventListener('click', () => {
+            details.style.display = details.style.display === 'flex' ? 'none' : 'flex';
+            card.classList.add('viewed');
+          });
+
+          const videoContainer = card.querySelector('.video-list');
+
+          // 🔹 Загружаем видео + добавляем вопрос
+          interview.videos.forEach(video => {
+            const block = document.createElement('div');
+            block.style.display = 'flex';
+            block.style.flexDirection = 'column';
+            block.style.gap = '4px';
+
+            const q = document.createElement('div');
+            q.textContent = video.question || '(No question)';
+            q.style.fontWeight = '600';
+            q.style.marginTop = '8px';
+
+            const vid = document.createElement('video');
+            vid.controls = true;
+            vid.style.maxWidth = '100%';
+            vid.style.borderRadius = '8px';
+            vid.style.background = '#000';
+
+            videoContainer.appendChild(block);
+            block.appendChild(q);
+            block.appendChild(vid);
+
+            // 🔸 Загружаем само видео из API
+            fetch(`/api/admin/video/${video.id}`, {
+              headers: { 'Authorization': 'Bearer ' + token }
+            })
+              .then(r => r.blob())
+              .then(blob => {
+                vid.src = URL.createObjectURL(blob);
+              })
+              .catch(err => console.error('Video load error:', err));
+          });
+
+          // 🔹 Обработка комментария
+          const textarea = card.querySelector('textarea');
+          const saveBtn = card.querySelector('.save-comment');
+
+          saveBtn.addEventListener('click', () => {
+            const comment = textarea.value.trim();
+            if (!comment) return alert('Comment is empty');
+            saveBtn.disabled = true;
+
+            fetch(`/api/admin/interview/${interview.id}/comment`, {
+              method: 'POST',
+              headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ comment })
+            })
+              .then(r => {
+                if (!r.ok) throw new Error('Failed to save');
+                return r.json();
+              })
+              .then(() => {
+                alert('✅ Comment saved');
+              })
+              .catch(err => {
+                alert('❌ ' + err.message);
+              })
+              .finally(() => {
+                saveBtn.disabled = false;
+              });
+          });
+
+          list.appendChild(card);
+        });
+      })
+      .catch(err => console.error('Interview load error:', err));
+  }
+</script>
+
 </body>
 
 </html>

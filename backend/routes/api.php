@@ -105,7 +105,7 @@ Route::post('/upload', function (Request $request) {
         Storage::disk('private')->delete($video->filename);
         $video->delete();
     }
-    
+
     $nVideo = 1;
     while ($request->hasFile('answer_' . $nVideo)) {
         $request->validate([
@@ -168,4 +168,48 @@ Route::post('/admin/question', function (Request $request) {
     }
 
     return response()->json(['message' => 'Questions updated']);
+})->middleware('auth:sanctum');
+
+Route::get('/admin/interviews', function (Request $request) {
+    $users = User::whereHas('videos')->with(['videos'])->get();
+
+    $interviews = $users->map(function ($user) {
+        return [
+            'id' => $user->id,
+            'user' => $user->name,
+            'time' => $user->videos->max('created_at'),
+            'comment' => $user->comment ?? '',
+            'videos' => ($user->videos)->map(function ($video) {
+                return [
+                    'id' => $video->id,
+                    'question' => $video->question,
+                    // 'filename' => $video->filename,
+                    // 'original_filename' => $video->original_filename
+                ];
+            }),
+        ];
+    });
+    return response()->json(['interviews' => $interviews]);
+})->middleware('auth:sanctum');
+
+Route::get('/admin/video/{id}', function (Request $request, $id) {
+    $video = Video::findOrFail($id);
+    $path = Storage::disk('private')->path($video->filename);
+    if (!file_exists($path)) {
+        abort(404, 'File not found');
+    }
+    return response()->file($path, [
+        'Content-Type' => $video->mime_type ?? 'application/octet-stream',
+        'Content-Disposition' => 'inline; filename="' . basename($path) . '"',
+    ]);
+})->middleware('auth:sanctum');
+
+Route::post('/admin/interview/{id}/comment', function (Request $request, $id) {
+    $data = $request->validate([
+        'comment' => 'nullable|string',
+    ]);
+    $user = User::findOrFail($id);
+    $user->comment = $data['comment'];
+    $user->save();
+    return response()->json(['message' => 'Comment saved']);
 })->middleware('auth:sanctum');

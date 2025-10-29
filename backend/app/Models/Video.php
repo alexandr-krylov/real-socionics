@@ -12,6 +12,8 @@ class Video extends Model
         'original_filename',
         'filesize',
         'mime_type',
+        'question',
+        'lang',1
     ];
 
     public function user()

@@ -108,6 +108,8 @@ Route::post('/upload', function (Request $request) {
             'original_filename' => $request->file("answer_$nVideo")->getClientOriginalName(),
             'filesize' => $request->file("answer_$nVideo")->getSize(),
             'mime_type' => $request->file("answer_$nVideo")->getClientMimeType(),
+            'question' => $request->input('questions')[$nVideo - 1] ?? null,
+            'lang' => $request->input('lang', 'en'),
         ]);
         $nVideo++;
     }

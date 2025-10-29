@@ -506,8 +506,13 @@
       const form = new FormData();
       let any = false;
       for (let i = 0; i < recordings.length; i++) {
-        if (recordings[i]) { form.append('answer_' + (i + 1), recordings[i], 'answer_' + (i + 1) + '.webm'); any = true; }
+        if (recordings[i]) {
+          form.append('answer_' + (i + 1), recordings[i], 'answer_' + (i + 1) + '.webm');
+          any = true; 
+          form.append('questions[]', questions[i].question);
+        }
       }
+      form.append('lang', currentLang);
       if (!any) { log(translations.noRecordsToUpload); return; }
       log(translations.uploading);
       if (!token) {

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 RateLimiter::for('otp-send', function (Request $request) {
     $identifier = $request->input('email') ?? $request->input('phone') ?? 'unknown';
@@ -95,6 +96,16 @@ Route::post('/auth/passwordless/verify', function (Request $request) {
 Route::get('/login', fn() => response()->json(['error' => 'Login required'], 401))->name('login');
 
 Route::post('/upload', function (Request $request) {
+    
+    // Clear existing videos
+    $videos = Video::where('lang', $request->input('lang', 'en'))
+    ->where('user_id', $request->user()->id)
+    ->get();
+    foreach ($videos as $video) {
+        Storage::disk('private')->delete($video->filename);
+        $video->delete();
+    }
+    
     $nVideo = 1;
     while ($request->hasFile('answer_' . $nVideo)) {
         $request->validate([
@@ -113,7 +124,7 @@ Route::post('/upload', function (Request $request) {
         ]);
         $nVideo++;
     }
-    return response()->json(['path' => $path]);
+    return response()->json(['message' => 'upload_success']);
 })->middleware('auth:sanctum');
 
 Route::post('/admin/login', function (Request $request) {

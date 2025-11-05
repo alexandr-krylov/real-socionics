@@ -3,7 +3,7 @@ name: Build and Minify Static Files
 on:
   push:
     branches: [ main ]
-
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest

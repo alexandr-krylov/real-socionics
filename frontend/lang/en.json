@@ -4,7 +4,7 @@
     "welcome_title": "Welcome to Real16",
     "welcome_text": "Take the personality test with Real16",
     "auth_text": "To start the typing, log in to the application.",
-    "auth_lead": "Choose a method: by Email or by SMS. We will send a login code.",
+    "auth_lead": "We will send a login code by email.",
     "tab_phone": "Phone",
     "phone_label": "Phone",
     "send_btn": "Send Code",

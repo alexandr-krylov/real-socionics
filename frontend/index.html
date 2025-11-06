@@ -260,9 +260,7 @@ C205.39,299.41 204,304 204,304" fill="none" stroke="#6d788e" stroke-width="11" s
     <line x1="174" x2="193" y1="140" y2="141" fill="none" stroke="#6d788e" stroke-width="10" stroke-linecap="round"
         stroke-linejoin="round" />
     <text x="390" y="261" font-size="240" text-anchor="start" font-family="Montserrat, sans-serif" font-weight="bold"
-        textLength="870" lengthAdjust="spacingAndGlyphs">
-        REAL
-        <tspan dx="-70" fill="#7859ff">16</tspan>
+        textLength="870" lengthAdjust="spacingAndGlyphs">REAL<tspan dx="-55" fill="#7859ff">16</tspan>
     </text>
 </svg>
         </div>
@@ -280,13 +278,6 @@ C205.39,299.41 204,304 204,304" fill="none" stroke="#6d788e" stroke-width="11" s
         <div class="card" role="main">
             <h1 id="auth-title"></h1>
             <p id="auth-lead" class="lead"></p>
-
-            <div class="tabs" role="tablist">
-                <button class="tab active" id="tab-email" data-mode="email" role="tab"
-                    aria-selected="true">Email</button>
-                <button class="tab" id="tab-phone" data-mode="phone" role="tab"></button>
-            </div>
-
             <form id="authForm" autocomplete="off">
                 <div class="field" id="field-email">
                     <label for="email">Email</label>
@@ -329,8 +320,6 @@ C205.39,299.41 204,304 204,304" fill="none" stroke="#6d788e" stroke-width="11" s
     </div>
 
     <script>
-        const tabEmail = document.getElementById('tab-email');
-        const tabPhone = document.getElementById('tab-phone');
         const fieldEmail = document.getElementById('field-email');
         const fieldPhone = document.getElementById('field-phone');
         const authForm = document.getElementById('authForm');
@@ -342,25 +331,11 @@ C205.39,299.41 204,304 204,304" fill="none" stroke="#6d788e" stroke-width="11" s
         const currentLang = localStorage.getItem('lang') || 'en';
         const langSwitches = document.querySelectorAll('#lang-switch button');
         const inputEmail = document.getElementById('email');
-        const inputPhone = document.getElementById('phone');
 
         let mode = 'email';
         let lastIdentifier = null;
         let translations = {};
 
-        function setMode(m) {
-            mode = m;
-            tabEmail.classList.toggle('active', m === 'email');
-            tabPhone.classList.toggle('active', m === 'phone');
-            inputEmail.required = m === 'email';
-            inputPhone.required = m === 'phone';
-            fieldEmail.style.display = m === 'email' ? 'block' : 'none';
-            fieldPhone.style.display = m === 'phone' ? 'block' : 'none';
-            statusEl.textContent = ''; otpArea.style.display = 'none';
-        }
-
-        tabEmail.addEventListener('click', () => setMode('email'));
-        tabPhone.addEventListener('click', () => setMode('phone'));
         langSwitches.forEach(btn => {
             btn.addEventListener('click', () => {
                 langSwitches.forEach(b => b.classList.toggle('active', false));
@@ -376,9 +351,9 @@ C205.39,299.41 204,304 204,304" fill="none" stroke="#6d788e" stroke-width="11" s
             sendBtn.disabled = true;
             statusEl.textContent = translations.sending_code;
             const payload = {};
-            if (mode === 'email') payload.email = document.getElementById('email').value.trim();
-            else payload.phone = document.getElementById('phone').value.trim();
-            lastIdentifier = payload.email || payload.phone;
+            payload.email = document.getElementById('email').value.trim();
+            lastIdentifier = payload.email;
+            payload.lang = localStorage.getItem('lang') || 'en';
 
             try {
                 const resp = await fetch('/api/auth/passwordless/send', {
@@ -407,7 +382,11 @@ C205.39,299.41 204,304 204,304" fill="none" stroke="#6d788e" stroke-width="11" s
                     {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ identifier: lastIdentifier, code })
+                        body: JSON.stringify({
+                            identifier: lastIdentifier,
+                            code,
+                            lang: localStorage.getItem('lang') || 'en'
+                        })
                     }
                 );
                 const data = await resp.json();
@@ -435,18 +414,12 @@ C205.39,299.41 204,304 204,304" fill="none" stroke="#6d788e" stroke-width="11" s
 
         // basic client validation (email/phone)
         function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
-        function isValidPhone(p) { return /^\+?[0-9\s\-()]{7,15}$/.test(p); }
 
         // simple UX: prevent sending invalid
         document.getElementById('email').addEventListener('input', () => {
             const v = document.getElementById('email').value;
             sendBtn.disabled = !(isValidEmail(v));
         });
-        document.getElementById('phone').addEventListener('input', () => {
-            const v = document.getElementById('phone').value;
-            sendBtn.disabled = !(isValidPhone(v));
-        });
-
         // initial disable until input
         sendBtn.disabled = true;
         loadLang(currentLang);
@@ -462,8 +435,6 @@ C205.39,299.41 204,304 204,304" fill="none" stroke="#6d788e" stroke-width="11" s
                 document.getElementById('welcome-text').textContent = t.welcome_text;
                 document.getElementById('auth-text').textContent = t.auth_text;
                 document.getElementById('auth-lead').textContent = t.auth_lead;
-                tabPhone.textContent = t.tab_phone;
-                document.getElementById('phone-label').textContent = t.phone_label;
                 sendBtn.textContent = t.send_btn;
                 document.getElementById('passwordless-hint').textContent = t.passwordless_hint;
                 document.getElementById('otp-label').textContent = t.otp_label;

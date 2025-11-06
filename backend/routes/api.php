@@ -6,6 +6,7 @@ use App\Models\Question;
 use App\Services\InfobipVerifyService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -14,8 +15,21 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
 RateLimiter::for('otp-send', function (Request $request) {
-    $identifier = $request->input('email') ?? $request->input('phone') ?? 'unknown';
+    $identifier = $request->input('email') ?? 'unknown';
     $key = sha1($identifier . '|' . $request->ip());
+
+    $cacheKey = 'otp-last-request:' . $key;
+    $lastRequestAt = Cache::get($cacheKey);
+    $now = now()->timestamp;
+    if ($lastRequestAt && ($now - $lastRequestAt) < 3) {
+        abort(response()->json([
+            'message' => 'Please wait at least 3 seconds before requesting again.'
+        ], 429));
+    }
+
+    // Сохраняем текущее время последнего запроса
+    Cache::put($cacheKey, $now, 60);
+
     return Limit::perMinute(5)->by($key);
 });
 
@@ -30,25 +44,27 @@ Route::get('/user', function (Request $request) {
 
 Route::post('/auth/passwordless/send', function (Request $request) {
     $data = $request->validate([
-        'email' => 'nullable|email',
-        'phone' => 'nullable|string',
+        'email' => 'required|email',
+        'lang' => 'required|in:ru,en',
     ]);
 
+    if (! in_array($data['lang'], ['en', 'ru'])) {
+        abort(400);
+    }
+    App::setLocale($data['lang']);
+
     if (empty($data['email']) && empty($data['phone'])) {
-        return response()->json(['error' => 'Email или телефон обязателен'], 422);
+        return response()->json(['error' => __('messages.email_is_required')], 422);
     }
     
     $identifier = $data['email'] ?? $data['phone'];
     if (isset($data['email'])) {
         $code = random_int(100000, 999999);
         Cache::put("otp_{$identifier}", $code, now()->addMinutes(5));
-        Mail::raw("Ваш код входа: $code", fn($msg) => $msg->to($data['email'])->subject('Код для входа'));
-    } else {
-        $res = app(App\Services\InfobipVerifyService::class)->sendCode($data['phone']);
-        $pinId = $res['pinId'];
-        Cache::put("otp_{$identifier}", $pinId, now()->addMinutes(5));
-        // Пример — заглушка под SMS
-        // Http::post('https://sms-provider.example.com/send', ['to' => $data['phone'], 'text' => "Ваш код: $code"]);
+        Mail::raw(
+            __('messages.your_entry_code', ['code' => $code]),
+            fn($msg) => $msg->to($data['email'])->subject(__('messages.code_for_entry'))
+        );
     }
 
     return response()->json(['message' => 'code_sent']);//, 200);
@@ -58,10 +74,15 @@ Route::post('/auth/passwordless/verify', function (Request $request) {
     $data = $request->validate([
         'identifier' => 'nullable|string',
         'code' => 'required|integer',
+        'lang' => 'required|in:ru,en',
     ]);
+    if (! in_array($data['lang'], ['en', 'ru'])) {
+        abort(400);
+    }
+    App::setLocale($data['lang']);
     $data['code'] = (int)$data['code'];
     if (empty($data['identifier'])) {
-        return response()->json(['error' => 'Identifier обязателен'], 422);
+        return response()->json(['error' => __('messages.identifier_is_obligatory')], 422);
     }
 
     $identifier = $data['identifier'];
@@ -69,13 +90,7 @@ Route::post('/auth/passwordless/verify', function (Request $request) {
         $pinId = Cache::get("otp_{$identifier}");
         $res = app(InfobipVerifyService::class)->verifyCode($pinId, $data['code']);
         if (!$res) {
-            return response()->json(['error' => 'Неверный код'], 422);
-        }
-        Cache::forget("otp_{$identifier}");
-    } else {
-        $code = Cache::get("otp_{$identifier}");
-        if ($code !== $data['code']) {
-            return response()->json(['error' => 'Неверный код'], 422);
+            return response()->json(['error' => __('messages.wrong_code')], 422);
         }
         Cache::forget("otp_{$identifier}");
     }

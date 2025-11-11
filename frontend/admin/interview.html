@@ -337,7 +337,7 @@
     container.innerHTML = '';
 
     const prev = document.createElement('button');
-    prev.textContent = '← Предыдущая';
+    prev.textContent = '← Prev';
     prev.disabled = meta.current_page <= 1;
     prev.onclick = () => loadInterviews(meta.current_page - 1);
     container.appendChild(prev);
@@ -351,7 +351,7 @@
     }
 
     const next = document.createElement('button');
-    next.textContent = 'Следующая →';
+    next.textContent = 'Next →';
     next.disabled = meta.current_page >= meta.last_page;
     next.onclick = () => loadInterviews(meta.current_page + 1);
     container.appendChild(next);

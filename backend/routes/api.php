@@ -186,25 +186,40 @@ Route::post('/admin/question', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::get('/admin/interviews', function (Request $request) {
-    $users = User::whereHas('videos')->with(['videos'])->get();
+
+    $perPage = $request->input('per_page', 10); // по умолчанию 10 записей
+    $page = $request->input('page', 1);
+
+    $users = User::whereHas('videos')
+        ->with(['videos'])
+        ->paginate($perPage, ['*'], 'page', $page);
 
     $interviews = $users->map(function ($user) {
         return [
             'id' => $user->id,
             'user' => $user->name,
-            'time' => $user->videos->max('created_at'),
+            'time' => DateTime::createFromFormat(
+                'Y-m-d H:i:s',
+                $user->videos->max('created_at')
+                )?->format('Y-m-d H:i:s'),
             'comment' => $user->comment ?? '',
             'videos' => ($user->videos)->map(function ($video) {
                 return [
                     'id' => $video->id,
                     'question' => $video->question,
-                    // 'filename' => $video->filename,
-                    // 'original_filename' => $video->original_filename
                 ];
             }),
         ];
     });
-    return response()->json(['interviews' => $interviews]);
+    return response()->json([
+        'data' => $interviews,
+        'meta' => [
+            'current_page' => $users->currentPage(),
+            'per_page' => $users->perPage(),
+            'total' => $users->total(),
+            'last_page' => $users->lastPage(),
+        ],
+    ]);
 })->middleware('auth:sanctum');
 
 Route::get('/admin/video/{id}', function (Request $request, $id) {

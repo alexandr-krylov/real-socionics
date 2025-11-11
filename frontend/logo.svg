@@ -1,0 +1,62 @@
+<svg width="1215" height="348" xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"
+    viewBox="0 0 1215 348">
+<defs>
+    <linearGradient id="grad1">
+        <stop offset="0%" stop-color="#4d91ff" />
+        <stop offset="100%" stop-color="#8257ff" />
+    </linearGradient>>
+</defs>
+<circle cx="174" cy="174" r="163" stroke="url(#grad1)" stroke-width="21"
+    fill="none" />
+<path d="M109,272 C110,262 112,245 113,230 C113,227 111,222 110,218
+    C107,210 103,206 103,206 C98,196 91,183 91,183 C88,172 86,157 86,157
+    C86,147 87,134 87,134 C88,122 90,116 94,110 C97,103 102,92 107,90
+    C110,87 121,76 129,74 C138,71 151,65 151,65 C162,62 177,60 187,62
+    C196,63 212,66 212,66 C225,69 234,78 234,78 C243,84 255,95 255,95
+    C262,104 267,121 267,121 C269,134 270,150 270,150 C270,158 270,169 271,169
+    C272,176 277,186 277,186 C280,192 285,198 285,198 C284,202 282,208 282,208 
+    C280,210 278,211 276,212 C273,212 269,214 269,214 C269,217 270,224 270,224 
+    C270,230 270,237 270,237 C269,240 267,247 266,247 C266,250 267,258 267,258 
+    C266,262 264,269 264,269 C260,271 252,274 252,274 C247,274 239,274 239,274 
+    C233,273 223,272 223,272 C218,274 211,277 211,277 C208,279 207,285 207,285 
+    C206,289 206,297 206,297 C205,299 204,304 204,304" fill="none"
+    stroke="#6d788e" stroke-width="11" stroke-linecap="round"
+    stroke-linejoin="round" />
+<circle cx="120" cy="144" r="9" fill="none" stroke="#6d788e" stroke-width="10" />
+<circle cx="135" cy="110" r="9" fill="none" stroke="#6d788e" stroke-width="10" />
+<circle cx="145" cy="169" r="9" fill="none" stroke="#6d788e" stroke-width="10" />
+<circle cx="164" cy="141" r="9" fill="none" stroke="#6d788e" stroke-width="10" />
+<circle cx="175" cy="97" r="9" fill="none" stroke="#6d788e" stroke-width="10" />
+<circle cx="204" cy="140" r="9" fill="none" stroke="#6d788e" stroke-width="10" />
+<circle cx="214" cy="104" r="9" fill="none" stroke="#6d788e" stroke-width="10" />
+<circle cx="237" cy="136" r="9" fill="none" stroke="#6d788e" stroke-width="10" />
+<path d="M163,209 C164,205 169,195 173,190 C176,184 180,179 184,177
+    C187,174 190,174 194,174 C197,173 200,173 204,172 C207,171 213,169 217,168
+    C220,166 222,165 225,162 C228,158 233,148 235,146" fill="none"
+    stroke="#6d788e" stroke-width="10" stroke-linecap="round"
+    stroke-linejoin="round" />
+<line x1="128" x2="138" y1="153" y2="162" fill="none" stroke="#6d788e"
+    stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+<line x1="151" x2="159" y1="160" y2="150" fill="none" stroke="#6d788e"
+    stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+<line x1="124" x2="131" y1="135" y2="120" fill="none" stroke="#6d788e"
+    stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M144,104 Q155,100 165,99" fill="none" stroke="#6d788e"
+    stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M176,108 Q176,118 170,132" fill="none" stroke="#6d788e"
+    stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+<line x1="187" x2="204" y1="98" y2="102" fill="none" stroke="#6d788e"
+    stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+<line x1="222" x2="232" y1="113" y2="125" fill="none" stroke="#6d788e"
+    stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+<line x1="226" x2="213" y1="137" y2="139" fill="none" stroke="#6d788e"
+    stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+<line x1="174" x2="193" y1="140" y2="141" fill="none" stroke="#6d788e"
+    stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+<text x="390" y="261" font-size="240" text-anchor="start"
+    font-family="Montserrat, sans-serif" font-weight="bold" textLength="870"
+    lengthAdjust="spacingAndGlyphs" fill="#4B0082">REAL<tspan dx="-55"
+    fill="#7859ff">16</tspan>
+</text>
+</svg>

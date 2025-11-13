@@ -165,7 +165,7 @@ Route::get('/admin/question', function (Request $request) {
 Route::post('/admin/question', function (Request $request) {
     $data = $request->validate([
         'questions' => 'required|array',
-        'questions.*.id' => 'nullable|integer|exists:questions,id',
+        'questions.*.id' => 'nullable|integer',
         'questions.*.question' => 'required|string',
         'questions.*.position' => 'integer',
     ]);
@@ -211,6 +211,7 @@ Route::get('/admin/interviews', function (Request $request) {
             }),
         ];
     });
+    $interviews = $interviews->sortByDesc('time')->values();
     return response()->json([
         'data' => $interviews,
         'meta' => [

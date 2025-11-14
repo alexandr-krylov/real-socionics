@@ -185,6 +185,12 @@ Route::post('/admin/question', function (Request $request) {
     return response()->json(['message' => 'Questions updated']);
 })->middleware('auth:sanctum');
 
+Route::delete('/admin/question/{id}', function (Request $request, $id) {
+    $question = Question::findOrFail($id);
+    $question->delete();
+    return response()->json(['message' => 'Question deleted']);
+})->middleware('auth:sanctum');
+
 Route::get('/admin/interviews', function (Request $request) {
 
     $perPage = $request->input('per_page', 10); // по умолчанию 10 записей

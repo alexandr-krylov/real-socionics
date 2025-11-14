@@ -186,6 +186,24 @@
       font-weight: 600
     }
 
+    #error-box {
+      display:none;
+      background:#fee2e2;
+      color:#b91c1c;
+      padding:10px;
+      margin-top:10px;
+      border-radius:5px;
+    }
+
+    #message-box {
+      display:none;
+      background:#dcfce7;
+      color:#166534;
+      padding:10px;
+      margin-top:10px;
+      border-radius:5px;
+    }
+
     @media (max-width: 640px) {
       aside {
         display: none;
@@ -308,6 +326,8 @@ C205.39,299.41 204,304 204,304" fill="none" stroke="#6d788e" stroke-width="11" s
       <button id="addBtn">➕ Add Question</button>
       <button id="saveBtn">💾 Save</button>
     </div>
+    <div id="error-box"></div>
+    <div id="message-box"></div>
   </main>
 
   <script>
@@ -315,8 +335,11 @@ C205.39,299.41 204,304 204,304" fill="none" stroke="#6d788e" stroke-width="11" s
     const list = document.getElementById('questionList');
     const addBtn = document.getElementById('addBtn');
     const saveBtn = document.getElementById('saveBtn');
-    let currentLang = localStorage.getItem('lang') || 'en';
+    const errorBox = document.getElementById('error-box');
+    const messageBox = document.getElementById('message-box');
     const langSwitches = document.querySelectorAll('#lang-switch button');
+
+    let currentLang = localStorage.getItem('lang') || 'en';
     let questions = [];
     loadUser();
     loadQuestions();
@@ -367,20 +390,37 @@ C205.39,299.41 204,304 204,304" fill="none" stroke="#6d788e" stroke-width="11" s
       renderQuestions();
     }
 
-    function saveQuestions() {
-      fetch(`/api/admin/question?lang=${encodeURIComponent(currentLang)}`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-         },
-        body: JSON.stringify({ questions })
-      })
-      .then(r => r.json())
-      .then(() => alert('Saved!'))
-      .catch(e => alert('Error: ' + e));
+    async function saveQuestions() {
+      hideAll();
+      try{
+        const response = await fetch(`/api/admin/question?lang=${encodeURIComponent(currentLang)}`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ questions })
+        });
+        const result = await response.json().catch(() => null);
+        if (!response.ok) {
+          if (result?.errors) {
+            // Ловим ошибки Laravel валидации
+            const firstError = Object.values(result.errors)[0][0];
+            showError(firstError);
+          } else if (result?.message) {
+            showError(result.message);
+          } else {
+            showError("Unknown server error");
+          }
+          return;
+        }
+        showMessage(result?.message || "Success");
+      } catch(e) {
+        showError("Network error: " + e.message);
+      }
     }
+
     function loadQuestions() {
       console.log('currentLang', currentLang);
       fetch(`/api/admin/question?lang=${encodeURIComponent(currentLang)}`, {
@@ -417,6 +457,7 @@ C205.39,299.41 204,304 204,304" fill="none" stroke="#6d788e" stroke-width="11" s
       const textarea = list.querySelectorAll('textarea')[i];
       questions[i].question = textarea.value;
     }
+
     langSwitches.forEach(btn => {
       btn.addEventListener('click', () => {
         langSwitches.forEach(b => b.classList.toggle('active', false));
@@ -426,6 +467,22 @@ C205.39,299.41 204,304 204,304" fill="none" stroke="#6d788e" stroke-width="11" s
         loadQuestions();
       });
     });
+    function showError(text) {
+      errorBox.innerText = text;
+      errorBox.style.display = 'block';
+
+      messageBox.style.display = 'none'; // скрыть успех
+    }
+    function showMessage(text) {
+      messageBox.innerText = text;
+      messageBox.style.display = 'block';
+
+      errorBox.style.display = 'none'; // скрыть ошибки
+    }
+    function hideAll() {
+      errorBox.style.display = 'none';
+      messageBox.style.display = 'none';
+    }
   </script>
 </body>
 </html>

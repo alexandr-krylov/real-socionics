@@ -214,21 +214,20 @@
 </head>
 
 <body>
-  
-    <header>
-      <div class="logo-container">
-        <img id="logo" src="logo.svg" alt="logo" />
-      </div>
-      <div id="lang-switch">
-        <button id="lang-en" data-lang="en" class="tab">EN</button>
-        <button id="lang-ru" data-lang="ru" class="tab">RU</button>
-      </div>
-    </header>
-<div class="wrap">
-  <section class="hero">
-    <h1 id="interview-title"></h1>
-    <div style="color:var(--muted);font-size:13px" id="welcome-text"></div>
-  </section>
+  <header>
+    <div class="logo-container">
+      <img id="logo" src="logo.svg" alt="logo" />
+    </div>
+    <div id="lang-switch">
+      <button id="lang-en" data-lang="en" class="tab">EN</button>
+      <button id="lang-ru" data-lang="ru" class="tab">RU</button>
+    </div>
+  </header>
+  <div class="wrap">
+    <section class="hero">
+      <h1 id="interview-title"></h1>
+      <div style="color:var(--muted);font-size:13px" id="welcome-text"></div>
+    </section>
     <div class="app">
       <div class="camera-card">
         <video id="preview" autoplay muted playsinline></video>
@@ -275,19 +274,9 @@
   </div>
 
   <script>
-
-    // ====== Конфигурация ======
-    // const QUESTIONS = [
-    //   'Как вас зовут и откуда вы?',
-    //   'Почему вы решили пройти интервью?',
-    //   'Вы больше интроверт или экстраверт?',
-    //   'Вы больве логик или чувственник?',
-    //   'Вы больше слушатель или вещатель?'
-    // ];
     const MAX_RECORD_SECONDS = 600; // авто-стоп записи
     const UPLOAD_ENDPOINT = '/upload.php'; // изменить при необходимости
 
-    // ====== Элементы ======
     const token = localStorage.getItem('token');
     const preview = document.getElementById('preview');
     const startCamBtn = document.getElementById('startCam');
@@ -328,11 +317,6 @@
     loadLang(currentLang);
     qTotEl.textContent = questions.length;
     loadUser();
-    
-    // ;
-    // renderQuestion();
-    
-    // 
 
     function log(msg) { logEl.textContent = msg; }
 
@@ -392,7 +376,7 @@
           stopRecording();
         }
       },
-      1000); 
+        1000);
     }
     function stopTimer() {
       clearInterval(timerInterval);
@@ -423,7 +407,15 @@
         log(translations.recordSavedForQuestion + (currentQuestion + 1));
         refreshRecordingsUI();
       };
-      recorder.start();
+      recorder.start(1000);
+      recorder.ondataavailable = async ev => {
+        if (ev.data && ev.data.size > 0) {
+          sendChunk(ev.data);
+        }
+      };
+      recorder.onstop = () => {
+        console.log("recording stopped");
+      };
       startTimer();
       log(translations.recordingIsBeginning);
     });
@@ -508,7 +500,7 @@
       for (let i = 0; i < recordings.length; i++) {
         if (recordings[i]) {
           form.append('answer_' + (i + 1), recordings[i], 'answer_' + (i + 1) + '.webm');
-          any = true; 
+          any = true;
           form.append('questions[]', questions[i].question);
         }
       }
@@ -556,7 +548,7 @@
       if (resp.ok) {
         const user = await resp.json();
       } else {
-        // window.location.href = '/login';
+        window.location.href = '/login';
       }
     }
     function loadQuestions() {
@@ -567,42 +559,42 @@
           'Authorization': 'Bearer ' + token
         }
       })
-      .then(r => r.json())
-      .then(data => {
-        questions = data.questions || [];
-        renderQuestion();
-      });
+        .then(r => r.json())
+        .then(data => {
+          questions = data.questions || [];
+          renderQuestion();
+        });
     }
     async function loadLang(lang) {
       await fetch(`/camera-questions-lang/${lang}.json`)
-      .then(r => r.json())
-      .then(t => {
-        translations = t;
-        console.log('translations', translations);
-        console.log('interview-title', t.interview-title);
-        // statusEl.textContent = '';
-        document.getElementById('title').textContent = t.title;
-        document.getElementById('interview-title').textContent = t.interview_title;
-        document.getElementById('startCam').textContent = t.startCam;
-        document.getElementById('welcome-text').textContent = t.welcome_text;
-        document.getElementById('stopCam').textContent = t.stopCam;
-        document.getElementById('toggleAudio').textContent = t.toggleAudio;
-        document.getElementById('camStatus').textContent = t.camStatus;
-        document.getElementById('instrBegin').textContent = t.instrBegin;
-        document.getElementById('instrUploadAll').textContent = t.instrUploadAll;
-        document.getElementById('instrEnd').textContent = t.instrEnd;
-        document.getElementById('question').textContent = t.question;
-        document.getElementById('prevQ').textContent = t.prevQ;
-        document.getElementById('nextQ').textContent = t.nextQ;
-        document.getElementById('startRec').textContent = t.startRec;
-        document.getElementById('stopRec').textContent = t.stopRec;
-        document.getElementById('downloadAll').textContent = t.downloadAll;
-        document.getElementById('uploadAll').textContent = t.uploadAll;
-        document.getElementById('footer').textContent = t.footer;
+        .then(r => r.json())
+        .then(t => {
+          translations = t;
+          console.log('translations', translations);
+          console.log('interview-title', t.interview - title);
+          // statusEl.textContent = '';
+          document.getElementById('title').textContent = t.title;
+          document.getElementById('interview-title').textContent = t.interview_title;
+          document.getElementById('startCam').textContent = t.startCam;
+          document.getElementById('welcome-text').textContent = t.welcome_text;
+          document.getElementById('stopCam').textContent = t.stopCam;
+          document.getElementById('toggleAudio').textContent = t.toggleAudio;
+          document.getElementById('camStatus').textContent = t.camStatus;
+          document.getElementById('instrBegin').textContent = t.instrBegin;
+          document.getElementById('instrUploadAll').textContent = t.instrUploadAll;
+          document.getElementById('instrEnd').textContent = t.instrEnd;
+          document.getElementById('question').textContent = t.question;
+          document.getElementById('prevQ').textContent = t.prevQ;
+          document.getElementById('nextQ').textContent = t.nextQ;
+          document.getElementById('startRec').textContent = t.startRec;
+          document.getElementById('stopRec').textContent = t.stopRec;
+          document.getElementById('downloadAll').textContent = t.downloadAll;
+          document.getElementById('uploadAll').textContent = t.uploadAll;
+          document.getElementById('footer').textContent = t.footer;
 
-        langSwitches.forEach(b => b.classList.toggle('active', false));
-        document.getElementById('lang-' + lang).classList.toggle('active', true);
-      });
+          langSwitches.forEach(b => b.classList.toggle('active', false));
+          document.getElementById('lang-' + lang).classList.toggle('active', true);
+        });
     }
     langSwitches.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -614,6 +606,29 @@
         loadQuestions();
       });
     });
+    async function sendChunk(chunk) {
+      const fd = new FormData();
+      fd.append("chunk", chunk, "chunk.webm");
+      fd.append("question_id", currentQuestion + 1);
+      fd.append("token", token);
+
+      try {
+        let r = await fetch("/api/upload-chunk", {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + token
+          },
+          body: fd
+        });
+
+        if (!r.ok) {
+          console.warn("Chunk upload failed");
+        }
+
+      } catch (e) {
+        console.error("Chunk upload error:", e);
+      }
+    }
   </script>
 </body>
 

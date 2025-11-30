@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\VideoController;
 use App\Models\User;
 use App\Models\Video;
 use App\Models\Question;
@@ -250,3 +251,12 @@ Route::post('/admin/interview/{id}/comment', function (Request $request, $id) {
     $user->save();
     return response()->json(['message' => 'Comment saved']);
 })->middleware('auth:sanctum');
+
+Route::post('/upload-chunk', [VideoController::class, 'chunk'])
+    ->middleware('auth:sanctum');
+
+Route::post('/stop-recording', [VideoController::class, 'merge'])
+    ->middleware('auth:sanctum');
+
+Route::post('/start-recording', [VideoController::class, 'prepare'])
+    ->middleware('auth:sanctum');

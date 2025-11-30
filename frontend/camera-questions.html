@@ -311,6 +311,7 @@
     let currentLang = localStorage.getItem('lang') || 'en';
     let questions = [];
     let translations = {};
+    let user = null;
 
     // init UI
     loadQuestions();
@@ -400,14 +401,15 @@
       } catch (e) {
         try { recorder = new MediaRecorder(stream); } catch (err) { log(translations.recorderDontAvailable + err.message); return; }
       }
-      recorder.ondataavailable = ev => { if (ev.data && ev.data.size > 0) recordChunks.push(ev.data); };
+      // recorder.ondataavailable = ev => { if (ev.data && ev.data.size > 0) recordChunks.push(ev.data); };
       recorder.onstop = () => {
         const blob = new Blob(recordChunks, { type: 'video/webm' });
         recordings[currentQuestion] = blob;
         log(translations.recordSavedForQuestion + (currentQuestion + 1));
         refreshRecordingsUI();
       };
-      recorder.start(1000);
+      prepareRecording();
+      recorder.start(2000);
       recorder.ondataavailable = async ev => {
         if (ev.data && ev.data.size > 0) {
           sendChunk(ev.data);
@@ -420,8 +422,15 @@
       log(translations.recordingIsBeginning);
     });
 
-    stopRec.addEventListener('click', () => { stopRecording(); });
-    function stopRecording() { if (recorder && recorder.state === 'recording') { recorder.stop(); stopTimer(); } }
+    stopRec.addEventListener('click', () => {
+      stopRecording();
+    });
+    function stopRecording() {
+      if (recorder && recorder.state === 'recording') {
+        recorder.stop();
+        stopTimer();
+      }
+    }
 
     function refreshRecordingsUI() {
       recordingsList.innerHTML = '';
@@ -546,7 +555,7 @@
         }
       });
       if (resp.ok) {
-        const user = await resp.json();
+        user = await resp.json();
       } else {
         window.location.href = '/login';
       }
@@ -610,8 +619,7 @@
       const fd = new FormData();
       fd.append("chunk", chunk, "chunk.webm");
       fd.append("question_id", currentQuestion + 1);
-      fd.append("token", token);
-
+      fd.append("user_id", user.id);
       try {
         let r = await fetch("/api/upload-chunk", {
           method: "POST",
@@ -620,15 +628,65 @@
           },
           body: fd
         });
-
         if (!r.ok) {
           console.warn("Chunk upload failed");
+        } else if (recorder.state !== 'recording') {
+          finishRecording();
         }
 
       } catch (e) {
         console.error("Chunk upload error:", e);
       }
     }
+    async function finishRecording() {
+      try {
+        let fd = {
+          user_id: user.id,
+          question_id: currentQuestion + 1
+        };
+        let r = await fetch("/api/stop-recording", {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify(fd)
+        });
+
+        if (!r.ok) {
+          console.warn("Stop recording failed");
+        }
+
+      } catch (e) {
+        console.error("Stop recording error:", e);
+      }
+    }
+
+    async function prepareRecording() {
+      try {
+        let fd = {
+          user_id: user.id,
+          question_id: currentQuestion + 1
+        };
+        let r = await fetch("/api/start-recording", {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify(fd)
+        });
+
+        if (!r.ok) {
+          console.warn("Prepare recording failed");
+        }
+
+      } catch (e) {
+        console.error("Prepare recording error:", e);
+      }
+    } 
   </script>
 </body>
 

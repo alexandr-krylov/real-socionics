@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y \
     git \
     unzip \
     zip \
+    ffmpeg \
     && docker-php-ext-install pdo pdo_mysql
 # Копируем сертификат в контейнер
 COPY docker/nginx/server.crt /usr/local/share/ca-certificates/mailcert.crt
